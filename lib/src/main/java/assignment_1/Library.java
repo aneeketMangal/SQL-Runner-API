@@ -3,8 +3,70 @@
  */
 package assignment_1;
 
-public class Library {
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.util.List;
+
+import assignment_1.exceptions.DatabaseNotConnectedException;
+import assignment_1.interfaces.SqlRunner;
+import assignment_1.service.XMLParser;
+
+public class Library implements SqlRunner {
     public boolean someLibraryMethod() {
         return true;
+    }
+    public Connection connection;
+    public String XMLFilePath;
+    public XMLParser xmlParser;
+
+    // Constructor for library Object
+    public Library(Connection connection, String filePath){
+        this.connection = connection;
+        this.XMLFilePath = filePath;
+    }
+
+    // Method to set the connection
+    public void setConnection(Connection connection){
+        this.connection = connection;
+    }
+
+    // Method to check if the connection object is present
+    public void checkConnection() throws Exception {
+        if (connection == null) {
+            throw new DatabaseNotConnectedException("Database not connected");
+        }
+    }
+    @Override
+    public <T, R> R selectOne(String queryId, T queryParam, Class<R> resultType) throws Exception {
+        // TODO: Implement this method
+        return null;
+    }
+
+    @Override
+    public <T, R> List<R> selectMany(String queryId, T queryParam, Class<R> resultType) throws NoSuchMethodException, SecurityException {
+        
+        // Method methods = queryParam.getClass().getMethod("aneeket", String.class);
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public <T> int insert(String queryId, T queryParam) throws Exception{
+        this.checkConnection();
+
+
+        return 0;
+    }
+
+    @Override
+    public <T> int delete(String queryId, T queryParam) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public <T> int update(String queryId, T queryParam) {
+        // TODO Auto-generated method stub
+        return 0;
     }
 }
