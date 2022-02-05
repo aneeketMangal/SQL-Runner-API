@@ -3,12 +3,16 @@
  */
 package assignment_1;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.List;
 
 import assignment_1.exceptions.DatabaseNotConnectedException;
+import assignment_1.exceptions.ParamTypeDifferentException;
 import assignment_1.interfaces.SqlRunner;
+import assignment_1.model.QueryObject;
 import assignment_1.service.XMLParser;
 
 public class Library implements SqlRunner {
@@ -18,6 +22,7 @@ public class Library implements SqlRunner {
     public Connection connection;
     public String XMLFilePath;
     public XMLParser xmlParser;
+
 
     // Constructor for library Object
     public Library(Connection connection, String filePath){
@@ -31,31 +36,65 @@ public class Library implements SqlRunner {
     }
 
     // Method to check if the connection object is present
-    public void checkConnection() throws Exception {
+    public void checkConnection() {
         if (connection == null) {
             throw new DatabaseNotConnectedException("Database not connected");
         }
     }
     @Override
-    public <T, R> R selectOne(String queryId, T queryParam, Class<R> resultType) throws Exception {
+    public <T, R> R selectOne(String queryId, T queryParam, Class<R> resultType) {
         // TODO: Implement this method
         return null;
     }
 
     @Override
-    public <T, R> List<R> selectMany(String queryId, T queryParam, Class<R> resultType) throws NoSuchMethodException, SecurityException {
+    public <T, R> List<R> selectMany(String queryId, T queryParam, Class<R> resultType){
         
-        // Method methods = queryParam.getClass().getMethod("aneeket", String.class);
         // TODO Auto-generated method stub
         return null;
     }
+    
+    public <T> String populateQuery(QueryObject qObj, T queryParam){
+        String name = queryParam.getClass().getName();
+        if(name == qObj.paramType){
+            String populatedQuery = qObj.query;
+            Field [] fields = queryParam.getClass().getDeclaredFields();
+            for(Field field: fields){
+                String fieldName = field.getName();
+                String fieldValue = null;
+                try {
+                    fieldValue = (String) field.get(queryParam);
+                    populatedQuery = populatedQuery.replaceAll("\\${"+fieldName+"\\}", fieldValue);
+                } catch (IllegalArgumentException | IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            populatedQuery.replace("${" + "" + "}", "");
+            }
+        }
+        else{
+            throw new ParamTypeDifferentException(qObj.paramType, name, qObj.id);
+        }
+        return null;
+    }
+
 
     @Override
-    public <T> int insert(String queryId, T queryParam) throws Exception{
+    public <T> int insert(String queryId, T queryParam){
         this.checkConnection();
-
-
-        return 0;
+        QueryObject queryObject = this.xmlParser.getQueryObject(queryId);
+        
+        try {
+            Class<?> classType = queryParam.getClass();
+            Object temp;
+            temp = classType.getConstructor().newInstance();
+            if(((Class<?>) temp).isInstance(classType)){
+                System.out.println("yes");
+            }
+            return 1;
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            e.printStackTrace();
+        }
+        return 0;        
     }
 
     @Override

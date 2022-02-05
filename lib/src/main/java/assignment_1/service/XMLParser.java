@@ -15,14 +15,19 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import assignment_1.exceptions.QueryNotFoundException;
 import assignment_1.model.QueryObject;
 
 public class XMLParser{
     
-    private static final String filePath = "C:\\Users\\lenovo\\Desktop\\Adhoora\\academics\\year3\\cs305\\app\\src\\main\\java\\test.xml";
+    private String filePath;
     
-    
-    public static QueryObject getQueryObject(String queryId) throws Exception {
+    public XMLParser(String str){
+        filePath = str;
+        filePath = "C:\\Users\\lenovo\\Desktop\\Adhoora\\academics\\year3\\cs305\\app\\src\\main\\java\\test.xml";
+    }
+
+    public QueryObject getQueryObject(String queryId){
         // Instantiate the Factory
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
@@ -49,7 +54,6 @@ public class XMLParser{
 
                         String id = element.getAttribute("id");
                         String paramType = element.getAttribute("paramType");
-                        String mapRowTo = element.getAttribute("mapRowTo");
                         String sqlQuery = element.getTextContent().trim();
                         
 
@@ -57,17 +61,19 @@ public class XMLParser{
                         return new QueryObject(
                             id, 
                             paramType, 
-                            sqlQuery, 
-                            mapRowTo
+                            sqlQuery
                         );
                     }
                 }
             }
             // Handling exception in case no query is found with the given id
-            throw(new Exception("Query not found"));
+            throw(new QueryNotFoundException(
+                queryId,
+                filePath
+            ));
 
         } catch (ParserConfigurationException | SAXException | IOException e) {
-           throw(new Exception(e));
+           throw(new RuntimeException(e));
         }
 
     }
