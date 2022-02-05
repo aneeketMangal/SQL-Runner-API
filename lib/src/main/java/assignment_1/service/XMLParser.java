@@ -20,11 +20,17 @@ import assignment_1.model.QueryObject;
 
 public class XMLParser{
     
-    private String filePath;
+    public String filePath;
     
     public XMLParser(String str){
-        filePath = str;
-        filePath = "C:\\Users\\lenovo\\Desktop\\Adhoora\\academics\\year3\\cs305\\app\\src\\main\\java\\test.xml";
+        this.filePath = str;
+        // filePath = "C:\\Users\\lenovo\\Desktop\\Adhoora\\academics\\year3\\cs305\\app\\src\\main\\java\\test.xml";
+    }
+
+    public static void main(String[] args){
+        XMLParser xmlParser = new XMLParser("C:\\Users\\lenovo\\Desktop\\Adhoora\\academics\\year3\\software\\cs305_2022\\lib\\src\\test\\resources\\test.xml");
+        QueryObject qObj = xmlParser.getQueryObject("findMovies");
+        System.out.println(qObj.query);
     }
 
     public QueryObject getQueryObject(String queryId){
@@ -48,10 +54,9 @@ public class XMLParser{
 
                 Node node = list.item(temp);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
-                
+                    
                     Element element = (Element) node;
-                    if(element.getAttribute("id") == queryId){
-
+                    if(element.getAttribute("id").equals(queryId)){
                         String id = element.getAttribute("id");
                         String paramType = element.getAttribute("paramType");
                         String sqlQuery = element.getTextContent().trim();
@@ -69,7 +74,7 @@ public class XMLParser{
             // Handling exception in case no query is found with the given id
             throw(new QueryNotFoundException(
                 queryId,
-                filePath
+                this.filePath
             ));
 
         } catch (ParserConfigurationException | SAXException | IOException e) {

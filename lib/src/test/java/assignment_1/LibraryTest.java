@@ -4,11 +4,16 @@
 package assignment_1;
 
 import org.junit.jupiter.api.Test;
+
+import assignment_1.exceptions.DatabaseNotConnectedException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class LibraryTest {
-    // @Test void () {
-    //     Library classUnderTest = new Library();
-    //     assertTrue(classUnderTest.someLibraryMethod(), "someLibraryMethod should return 'true'");
-    // }
+    @Test
+    public void checkConnectionThrowsDNCException (){
+        assertThrows(RuntimeException.class, () -> {
+            new Library(null, "Test String").checkConnection();
+        });
+    }
 }

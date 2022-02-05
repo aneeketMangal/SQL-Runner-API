@@ -16,23 +16,15 @@ import assignment_1.model.QueryObject;
 import assignment_1.service.XMLParser;
 
 public class Library implements SqlRunner {
-    public boolean someLibraryMethod() {
-        return true;
-    }
-    public Connection connection;
-    public String XMLFilePath;
-    public XMLParser xmlParser;
 
+    public Connection connection;
+    public String xmlFilePath;
+    public XMLParser xmlParser;
 
     // Constructor for library Object
     public Library(Connection connection, String filePath){
         this.connection = connection;
-        this.XMLFilePath = filePath;
-    }
-
-    // Method to set the connection
-    public void setConnection(Connection connection){
-        this.connection = connection;
+        this.xmlFilePath = filePath;
     }
 
     // Method to check if the connection object is present
@@ -41,6 +33,38 @@ public class Library implements SqlRunner {
             throw new DatabaseNotConnectedException("Database not connected");
         }
     }
+
+    public static void main(){
+        new Library(null, "dfsa").checkConnection();
+    }
+    
+    public <T> void checkParamTypes(QueryObject qObj, T queryParam) {
+        String paramType = queryParam.getClass().getName();
+        String paramTypeInXML = qObj.paramType;
+        if (!paramType.equals(paramTypeInXML)) {
+            throw new ParamTypeDifferentException(paramType, paramType, qObj.id);
+        }
+    }
+
+    public <T> String populateQuery(QueryObject qObj, T queryParam){
+        this.checkParamTypes(qObj, queryParam);
+       
+        String populatedQuery = qObj.query;
+        Field [] fields = queryParam.getClass().getDeclaredFields();
+        for(Field field: fields){
+            String fieldName = field.getName();
+            String fieldValue = null;
+            try {
+                fieldValue = (String) field.get(queryParam);
+                populatedQuery = populatedQuery.replaceAll("\\${"+fieldName+"\\}", fieldValue);
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return populatedQuery;
+    }
+
+
     @Override
     public <T, R> R selectOne(String queryId, T queryParam, Class<R> resultType) {
         // TODO: Implement this method
@@ -54,30 +78,6 @@ public class Library implements SqlRunner {
         return null;
     }
     
-    public <T> String populateQuery(QueryObject qObj, T queryParam){
-        String name = queryParam.getClass().getName();
-        if(name == qObj.paramType){
-            String populatedQuery = qObj.query;
-            Field [] fields = queryParam.getClass().getDeclaredFields();
-            for(Field field: fields){
-                String fieldName = field.getName();
-                String fieldValue = null;
-                try {
-                    fieldValue = (String) field.get(queryParam);
-                    populatedQuery = populatedQuery.replaceAll("\\${"+fieldName+"\\}", fieldValue);
-                } catch (IllegalArgumentException | IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            populatedQuery.replace("${" + "" + "}", "");
-            }
-        }
-        else{
-            throw new ParamTypeDifferentException(qObj.paramType, name, qObj.id);
-        }
-        return null;
-    }
-
-
     @Override
     public <T> int insert(String queryId, T queryParam){
         this.checkConnection();
@@ -91,7 +91,14 @@ public class Library implements SqlRunner {
                 System.out.println("yes");
             }
             return 1;
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+        } catch (
+            InstantiationException | 
+            IllegalAccessException | 
+            IllegalArgumentException | 
+            InvocationTargetException | 
+            NoSuchMethodException | 
+            SecurityException e
+        ) {
             e.printStackTrace();
         }
         return 0;        
