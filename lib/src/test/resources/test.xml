@@ -1,5 +1,5 @@
 <queries>
-   <sql id="findMovies" paramType="org.foo.Bar">
-      <![CDATA[Test String]]>
+   <sql id="findMovies" paramType="assignment_1.anee">
+      <![CDATA[SELECT a, b, c FROM my_table WHERE x=${propX} AND y=${propY};]]>
    </sql>
 </queries>

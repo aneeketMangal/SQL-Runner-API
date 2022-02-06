@@ -7,6 +7,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import assignment_1.exceptions.DatabaseNotConnectedException;
@@ -22,7 +27,7 @@ public class Library implements SqlRunner {
     public XMLParser xmlParser;
 
     // Constructor for library Object
-    public Library(Connection connection, String filePath){
+    public Library(Connection connection, String filePath) {
         this.connection = connection;
         this.xmlFilePath = filePath;
     }
@@ -34,85 +39,164 @@ public class Library implements SqlRunner {
         }
     }
 
-    public static void main(){
-        new Library(null, "dfsa").checkConnection();
-    }
-    
     public <T> void checkParamTypes(QueryObject qObj, T queryParam) {
         String paramType = queryParam.getClass().getName();
         String paramTypeInXML = qObj.paramType;
+        System.out.println(paramType + " " + paramTypeInXML);
         if (!paramType.equals(paramTypeInXML)) {
             throw new ParamTypeDifferentException(paramType, paramType, qObj.id);
         }
     }
 
-    public <T> String populateQuery(QueryObject qObj, T queryParam){
+    // public String replaceUtility(String query, String prev, String next) {
+    // String fieldName = field.getName();
+    // String fieldValue = "";
+
+    // String parsedQuery = query;
+    // if(isStringClass){
+    // parsedQuery = parsedQuery.replace(prev, "\"" + now + "\"");
+    // }else{
+    // parsedQuery = parsedQuery.replace(prev, now);
+    // }
+    // return parsedQuery;
+    // }
+
+    public <T> String populateQuery(QueryObject qObj, T queryParam) {
+        // TODO: Implement this method
         this.checkParamTypes(qObj, queryParam);
-       
+
         String populatedQuery = qObj.query;
-        Field [] fields = queryParam.getClass().getDeclaredFields();
-        for(Field field: fields){
-            String fieldName = field.getName();
-            String fieldValue = null;
-            try {
-                fieldValue = (String) field.get(queryParam);
-                populatedQuery = populatedQuery.replaceAll("\\${"+fieldName+"\\}", fieldValue);
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                e.printStackTrace();
+        Class<?> classType = queryParam.getClass();
+        if (classType.isPrimitive()) {
+            if (classType.getSimpleName().equals("String")) {
+                populatedQuery = populatedQuery.replace("${value}", "\"" + queryParam.toString() + "\"");
+            } else {
+                // todo: HANDLE array/collection
+                populatedQuery = populatedQuery.replace("{$value}", queryParam.toString());
+            }
+        } else {
+            Field[] fields = queryParam.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                String fieldName = field.getName();
+                String fieldClass = field.getType().getName();
+                String fieldValue = null;
+                try {
+                    fieldValue = (String) field.get(queryParam);
+                    if (fieldClass.equals("String")) {
+                        populatedQuery = populatedQuery.replace("${" + fieldName + "}", "\"" + fieldValue + "\"");
+                    } else {
+                        populatedQuery = populatedQuery.replace("${" + fieldName + "}", fieldValue);
+                    }
+                } catch (IllegalArgumentException | IllegalAccessException e) {
+                    throw (new RuntimeException(e));
+                }
             }
         }
         return populatedQuery;
     }
 
+    public static void main(String[] args) {
+        // QueryObject qObj = new QueryObject(
+        // "findMovies",
+        // "java.lang.String",
+        // "SELECT a, b, c FROM my_table WHERE x=${value};"
+
+        // );
+        // System.out.println(new Library(null, "").populateQuery(qObj, "anee"));
+        // ArrayList<String> list = new ArrayList<String>();
+        // list.add("anee");
+
+        // boolean isCollection = Collection.class.isAssignableFrom(list.getClass());
+        // System.out.println(isCollection);
+        // System.out.println(a.getClass().getSimpleName() + " --" +a.toString());
+    }
 
     @Override
     public <T, R> R selectOne(String queryId, T queryParam, Class<R> resultType) {
-        // TODO: Implement this method
-        return null;
+        try {
+            ResultSet resultSet = this.runSelectQuery(queryId, queryParam);
+            if(resultSet.next()){
+                R result = resultType.getDeclaredConstructor().newInstance();
+
+                return result;
+            }
+            return null;
+        } catch (IllegalArgumentException | SecurityException | InstantiationException | SQLException
+                | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override
-    public <T, R> List<R> selectMany(String queryId, T queryParam, Class<R> resultType){
-        
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
-    @Override
-    public <T> int insert(String queryId, T queryParam){
-        this.checkConnection();
-        QueryObject queryObject = this.xmlParser.getQueryObject(queryId);
-        
+    public <T, R> List<R> selectMany(String queryId, T queryParam, Class<R> resultType) {
         try {
-            Class<?> classType = queryParam.getClass();
-            Object temp;
-            temp = classType.getConstructor().newInstance();
-            if(((Class<?>) temp).isInstance(classType)){
-                System.out.println("yes");
+            ResultSet resultSet = this.runSelectQuery(queryId, queryParam);
+            List<R> result = new ArrayList<R>();
+            
+            while (resultSet.next()) {
+                R newR = resultType.getDeclaredConstructor().newInstance();
+                result.add(newR);
             }
-            return 1;
-        } catch (
-            InstantiationException | 
-            IllegalAccessException | 
-            IllegalArgumentException | 
-            InvocationTargetException | 
-            NoSuchMethodException | 
-            SecurityException e
-        ) {
-            e.printStackTrace();
+            return result;
+        } catch (IllegalArgumentException | SecurityException | SQLException | InstantiationException
+                | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
         }
-        return 0;        
+    }
+
+    public <T> int runCountQuery(String queryId, T queryParam) {
+        try {
+            this.checkConnection();
+            QueryObject queryObject = this.xmlParser.getQueryObject(queryId);
+            String finalQuery = this.populateQuery(queryObject, queryParam);
+            Statement statement;
+            statement = this.connection.createStatement();
+            int countAffectedRows = statement.executeUpdate(finalQuery);
+            return countAffectedRows;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public <T> ResultSet runSelectQuery(String queryId, T queryParam) {
+        try {
+            this.checkConnection();
+            QueryObject queryObject = this.xmlParser.getQueryObject(queryId);
+            String finalQuery = this.populateQuery(queryObject, queryParam);
+            Statement statement;
+            statement = this.connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(finalQuery);
+            return resultSet;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public <T> int insert(String queryId, T queryParam) {
+        try {
+            return this.runCountQuery(queryId, queryParam);
+        } catch (IllegalArgumentException | SecurityException e) {
+            throw (new RuntimeException(e));
+        }
     }
 
     @Override
     public <T> int delete(String queryId, T queryParam) {
-        // TODO Auto-generated method stub
-        return 0;
+        try {
+            return this.runCountQuery(queryId, queryParam);
+        } catch (IllegalArgumentException | SecurityException e) {
+            throw (new RuntimeException(e));
+        }
     }
 
     @Override
     public <T> int update(String queryId, T queryParam) {
-        // TODO Auto-generated method stub
-        return 0;
+        try {
+            return this.runCountQuery(queryId, queryParam);
+        } catch (IllegalArgumentException | SecurityException e) {
+            throw (new RuntimeException(e));
+        }
     }
 }
