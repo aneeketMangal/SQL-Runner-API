@@ -8,9 +8,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -42,38 +45,38 @@ public class Library implements SqlRunner {
     public <T> void checkParamTypes(QueryObject qObj, T queryParam) {
         String paramType = queryParam.getClass().getName();
         String paramTypeInXML = qObj.paramType;
+        System.out.println(paramType);
         System.out.println(paramType + " " + paramTypeInXML);
         if (!paramType.equals(paramTypeInXML)) {
             throw new ParamTypeDifferentException(paramType, paramType, qObj.id);
         }
     }
 
-    // public String replaceUtility(String query, String prev, String next) {
-    // String fieldName = field.getName();
-    // String fieldValue = "";
-
-    // String parsedQuery = query;
-    // if(isStringClass){
-    // parsedQuery = parsedQuery.replace(prev, "\"" + now + "\"");
-    // }else{
-    // parsedQuery = parsedQuery.replace(prev, now);
-    // }
-    // return parsedQuery;
-    // }
-
     public <T> String populateQuery(QueryObject qObj, T queryParam) {
         // TODO: Implement this method
-        this.checkParamTypes(qObj, queryParam);
+        // this.checkParamTypes(qObj, queryParam);
 
         String populatedQuery = qObj.query;
         Class<?> classType = queryParam.getClass();
         if (classType.isPrimitive()) {
-            if (classType.getSimpleName().equals("String")) {
+            if (classType.getName().equals("java.lang.String")) {
                 populatedQuery = populatedQuery.replace("${value}", "\"" + queryParam.toString() + "\"");
             } else {
-                // todo: HANDLE array/collection
+
                 populatedQuery = populatedQuery.replace("{$value}", queryParam.toString());
             }
+        } else if (classType.isArray()) {
+
+            System.out.println(" ---- " + classType.getName());
+            String temp = String.join(",", (CharSequence[]) queryParam);
+            populatedQuery = populatedQuery.replace("${value}", "(" + temp + ")");
+        }
+        // only linear collections are allowed
+        else if (Collection.class.isAssignableFrom(classType)) {
+            
+            String temp = String.join(",", (CharSequence[]) ((AbstractCollection<String>) queryParam).toArray());
+            System.out.println(temp);
+            populatedQuery = populatedQuery.replace("${value}", "(" + temp + ")");
         } else {
             Field[] fields = queryParam.getClass().getDeclaredFields();
             for (Field field : fields) {
@@ -96,17 +99,28 @@ public class Library implements SqlRunner {
     }
 
     public static void main(String[] args) {
-        // QueryObject qObj = new QueryObject(
-        // "findMovies",
-        // "java.lang.String",
-        // "SELECT a, b, c FROM my_table WHERE x=${value};"
+        QueryObject qObj = new QueryObject(
+                "findMovies",
+                "java.lang.String",
+                "SELECT a, b, c FROM my_table WHERE x=${value};"
 
-        // );
-        // System.out.println(new Library(null, "").populateQuery(qObj, "anee"));
+        );
+        int[] arr = { 2, 3, 4};
+        ArrayList<String> list = new ArrayList<String>();
+        list.add("anee");
+        System.out.println(new Library(null, "").populateQuery(qObj, arr));
+
         // ArrayList<String> list = new ArrayList<String>();
-        // list.add("anee");
+        // list.add("aneeket");
+        // list.add("banawat");
+        // String[] arr = new String[2];
+        // arr[0] = "anee";
+        // arr[1] = "temp";
 
+        // System.out.println(Arrays.toString(list.toArray()));
+        // System.out.println(arr.getClass().isArray() + " ---" + Arrays.toString(arr));
         // boolean isCollection = Collection.class.isAssignableFrom(list.getClass());
+
         // System.out.println(isCollection);
         // System.out.println(a.getClass().getSimpleName() + " --" +a.toString());
     }
@@ -115,7 +129,19 @@ public class Library implements SqlRunner {
     public <T, R> R selectOne(String queryId, T queryParam, Class<R> resultType) {
         try {
             ResultSet resultSet = this.runSelectQuery(queryId, queryParam);
-            if(resultSet.next()){
+            ResultSetMetaData resultMeta = resultSet.getMetaData();
+            int columnCount = resultMeta.getColumnCount();
+            String [] columnNames = new String[columnCount];
+            Field [] fields = resultType.getDeclaredFields();
+            for (int i = 1; i <= columnCount; i++) {
+                columnNames[i-1] = resultMeta.getColumnName(i);
+                // retrievedField.set(classObject, value);
+            }
+            if (resultSet.next()) {
+                for(int i  =0 ; i<columnCount; i++){
+                    String value = resultSet.getString(i+1);
+                    
+                }
                 R result = resultType.getDeclaredConstructor().newInstance();
 
                 return result;
@@ -133,7 +159,7 @@ public class Library implements SqlRunner {
         try {
             ResultSet resultSet = this.runSelectQuery(queryId, queryParam);
             List<R> result = new ArrayList<R>();
-            
+
             while (resultSet.next()) {
                 R newR = resultType.getDeclaredConstructor().newInstance();
                 result.add(newR);
