@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -15,12 +16,23 @@ import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.function.LongBinaryOperator;
+
+import javax.print.DocFlavor.STRING;
+import javax.print.attribute.HashAttributeSet;
 
 import assignment_1.exceptions.DatabaseNotConnectedException;
+import assignment_1.exceptions.MultipleResultsFound;
 import assignment_1.exceptions.ParamTypeDifferentException;
 import assignment_1.interfaces.SqlRunner;
 import assignment_1.model.QueryObject;
+import assignment_1.service.ReplaceUtility;
 import assignment_1.service.XMLParser;
 
 public class Library implements SqlRunner {
@@ -28,11 +40,13 @@ public class Library implements SqlRunner {
     public Connection connection;
     public String xmlFilePath;
     public XMLParser xmlParser;
+    public ReplaceUtility ru;
 
     // Constructor for library Object
     public Library(Connection connection, String filePath) {
         this.connection = connection;
         this.xmlFilePath = filePath;
+        this.ru = new ReplaceUtility();
     }
 
     // Method to check if the connection object is present
@@ -57,58 +71,118 @@ public class Library implements SqlRunner {
         // this.checkParamTypes(qObj, queryParam);
 
         String populatedQuery = qObj.query;
-        Class<?> classType = queryParam.getClass();
-        if (classType.isPrimitive()) {
-            if (classType.getName().equals("java.lang.String")) {
-                populatedQuery = populatedQuery.replace("${value}", "\"" + queryParam.toString() + "\"");
-            } else {
+        Object paramObject = (Object) queryParam;
 
-                populatedQuery = populatedQuery.replace("{$value}", queryParam.toString());
-            }
-        } else if (classType.isArray()) {
-
-            System.out.println(" ---- " + classType.getName());
-            String temp = String.join(",", (CharSequence[]) queryParam);
-            populatedQuery = populatedQuery.replace("${value}", "(" + temp + ")");
-        }
-        // only linear collections are allowed
-        else if (Collection.class.isAssignableFrom(classType)) {
-            
-            String temp = String.join(",", (CharSequence[]) ((AbstractCollection<String>) queryParam).toArray());
-            System.out.println(temp);
-            populatedQuery = populatedQuery.replace("${value}", "(" + temp + ")");
-        } else {
+        try {
+            populatedQuery = ru.replaceUtility(paramObject, populatedQuery, "value");
+            return populatedQuery;
+        } catch (Exception e) {
+            // fetching the fields of the class
             Field[] fields = queryParam.getClass().getDeclaredFields();
             for (Field field : fields) {
+                Object fieldObject = field;
                 String fieldName = field.getName();
-                String fieldClass = field.getType().getName();
-                String fieldValue = null;
                 try {
-                    fieldValue = (String) field.get(queryParam);
-                    if (fieldClass.equals("String")) {
-                        populatedQuery = populatedQuery.replace("${" + fieldName + "}", "\"" + fieldValue + "\"");
-                    } else {
-                        populatedQuery = populatedQuery.replace("${" + fieldName + "}", fieldValue);
-                    }
-                } catch (IllegalArgumentException | IllegalAccessException e) {
-                    throw (new RuntimeException(e));
+                    populatedQuery = ru.replaceUtility(fieldObject, populatedQuery, fieldName);
+                    
+
+                } catch (IllegalArgumentException E) {
+                    throw (new RuntimeException(E));
                 }
             }
+
+            return populatedQuery;
         }
-        return populatedQuery;
     }
 
     public static void main(String[] args) {
-        QueryObject qObj = new QueryObject(
-                "findMovies",
-                "java.lang.String",
-                "SELECT a, b, c FROM my_table WHERE x=${value};"
 
-        );
-        int[] arr = { 2, 3, 4};
-        ArrayList<String> list = new ArrayList<String>();
-        list.add("anee");
-        System.out.println(new Library(null, "").populateQuery(qObj, arr));
+        Integer a = 5;
+        int b = 3;
+        String c = "hello";
+        anee d = new anee();
+        Boolean dd = true;
+        float ee = 23.4f;
+        double ff = 23.4;
+        String[] e = { "anee", "temp", "funny" };
+        Integer[] eef = { 1, 2, 3 };
+        char[] eeef = { 'a', 'b', 'c' };
+        String q = "SELECT * FROM books WHERE id = ${id};";
+        ReplaceUtility rr = new ReplaceUtility();
+
+        Collection<String> collection = new PriorityQueue<String>();
+
+        // System.out.println(collection.getClass().getName());
+        // collection.add("anee");
+        // collection.add("gunny");
+        // collection.add("temp");
+
+        // Iterator<?> iterator = collection.iterator();
+
+        // // while loop
+        // while (iterator.hasNext()) {
+        // System.out.println("value= " + iterator.next().getClass().getName());
+
+        // }
+
+        // System.out.println(rr.replaceUtility(((Object)e), q, "id"));
+
+        // System.out.println(rr.replaceUtility(((Object)dd).getClass().getName(), q,
+        // "id", "1"));
+        // System.out.println(rr.replaceUtility(((Object)ee).getClass().getName(), q,
+        // "id", "1"));
+        // System.out.println(rr.replaceUtility(((Object)ff).getClass().getName(), q,
+        // "id", "1"));
+
+        // try {
+        // Class.forName("com.mysql.cj.jdbc.Driver");
+        // } catch (ClassNotFoundException e) {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // }
+        // Connection c;
+        // System.out.println("fds");
+        // try {
+        // c =
+        // DriverManager.getConnection("jdbc:mysql://localhost:3306/sakila?user=root&password=papamangal&useUnicode=true&characterEncoding=UTF-8");
+        // Library library = new Library(c,
+        // "src/main/resources/assignment_1/queries.xml");
+        // QueryObject queryObject = library.xmlParser.getQueryObject("findMovies");
+        // String finalQuery = library.populateQuery(queryObject, new anee());
+        // System.out.println(finalQuery);
+        // } catch (SQLException e) {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // }
+        // try (
+            // Statement statement;
+            // statement = library.connection.createStatement();
+            // ResultSet resultSet = statement.executeQuery(finalQuery);
+            // } catch (SQLException e) {
+                // // TODO Auto-generated catch block
+                // e.printStackTrace();
+                // }
+                Library temp = new Library(null, "fdsa");
+                
+                QueryObject qObj = new QueryObject(
+                    "findMovies",
+                    "java.lang.String",
+                    "SELECT a, b, c FROM my_table WHERE x=${value};"
+                    
+                );
+                Integer [] aa = {1,2,3};
+                String [] bb = {"a","b","c"};
+                // char [] bb = {};
+
+                String query = temp.populateQuery(qObj,aa);
+                System.out.println(query);
+                query = temp.populateQuery(qObj,bb);
+                System.out.println(query);
+                    // System.out.println((((Object) eef), q, "id"));
+        // int[] arr = { 2, 3, 4};
+        // ArrayList<String> list = new ArrayList<String>();
+        // list.add("anee");
+        // System.out.println(new Library(null, "").populateQuery(qObj, arr));
 
         // ArrayList<String> list = new ArrayList<String>();
         // list.add("aneeket");
@@ -131,23 +205,33 @@ public class Library implements SqlRunner {
             ResultSet resultSet = this.runSelectQuery(queryId, queryParam);
             ResultSetMetaData resultMeta = resultSet.getMetaData();
             int columnCount = resultMeta.getColumnCount();
-            String [] columnNames = new String[columnCount];
-            Field [] fields = resultType.getDeclaredFields();
-            for (int i = 1; i <= columnCount; i++) {
-                columnNames[i-1] = resultMeta.getColumnName(i);
-                // retrievedField.set(classObject, value);
-            }
-            if (resultSet.next()) {
-                for(int i  =0 ; i<columnCount; i++){
-                    String value = resultSet.getString(i+1);
-                    
+            resultSet.last();
+            int resultCount = resultSet.getRow();
+            if (resultCount == 0) {
+                return null;
+            } else if (resultCount == 1) {
+                resultSet.first();
+                String[] columnNames = new String[columnCount];
+                Field[] fields = resultType.getDeclaredFields();
+                for (int i = 1; i <= columnCount; i++) {
+                    // field.set(classObject, value);
+                    columnNames[i - 1] = resultMeta.getColumnName(i);
+                    System.out.println(columnNames[i - 1]);
+                }
+
+                for (int i = 0; i < columnCount; i++) {
+                    Object value = resultSet.getObject(i + 1);
+                    fields[i].getClass().cast(value);
                 }
                 R result = resultType.getDeclaredConstructor().newInstance();
-
                 return result;
+
+            } else {
+                throw new MultipleResultsFound(queryId);
             }
-            return null;
-        } catch (IllegalArgumentException | SecurityException | InstantiationException | SQLException
+
+        } catch (ClassCastException | IllegalArgumentException | SecurityException | InstantiationException
+                | SQLException
                 | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
