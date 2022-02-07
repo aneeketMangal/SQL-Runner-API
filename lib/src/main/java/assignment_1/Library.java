@@ -16,6 +16,7 @@ import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -95,22 +96,22 @@ public class Library implements SqlRunner {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException {
 
-        Integer a = 5;
-        int b = 3;
-        String c = "hello";
-        anee d = new anee();
-        Boolean dd = true;
-        float ee = 23.4f;
-        double ff = 23.4;
-        String[] e = { "anee", "temp", "funny" };
-        Integer[] eef = { 1, 2, 3 };
-        char[] eeef = { 'a', 'b', 'c' };
-        String q = "SELECT * FROM books WHERE id = ${id};";
-        ReplaceUtility rr = new ReplaceUtility();
+        // Integer a = 5;
+        // int b = 3;
+        // String c = "hello";
+        // anee d = new anee();
+        // Boolean dd = true;
+        // float ee = 23.4f;
+        // double ff = 23.4;
+        // String[] e = { "anee", "temp", "funny" };
+        // Integer[] eef = { 1, 2, 3 };
+        // char[] eeef = { 'a', 'b', 'c' };
+        // String q = "SELECT * FROM books WHERE id = ${id};";
+        // ReplaceUtility rr = new ReplaceUtility();
 
-        Collection<String> collection = new PriorityQueue<String>();
+        // Collection<String> collection = new PriorityQueue<String>();
 
         // System.out.println(collection.getClass().getName());
         // collection.add("anee");
@@ -140,13 +141,63 @@ public class Library implements SqlRunner {
         // // TODO Auto-generated catch block
         // e.printStackTrace();
         // }
-        // Connection c;
-        // System.out.println("fds");
-        // try {
-        // c =
-        // DriverManager.getConnection("jdbc:mysql://localhost:3306/sakila?user=root&password=papamangal&useUnicode=true&characterEncoding=UTF-8");
-        // Library library = new Library(c,
-        // "src/main/resources/assignment_1/queries.xml");
+        Class.forName("com.mysql.cj.jdbc.Driver");  
+        Connection c;
+        System.out.println("fds");
+        try {
+        c =
+        DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/sakila?allowPublicKeyRetrieval=true&user=root&password=papamangal&useSSL=false");
+        Library library = new Library(c,
+        "src/main/resources/assignment_1/queries.xml");
+
+        
+
+        Statement statement;
+        String finalQuery = "SELECT * from actor where first_name = \"MINNIE\"";
+        statement = library.connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(finalQuery);
+        // resultSet.first();
+        ResultSetMetaData rsmd = resultSet.getMetaData();
+        for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+            // field.set(classObject, value);
+            
+            System.out.println(rsmd.getColumnName(i));
+            
+        }
+        Date temp;
+        List<anee> te = new ArrayList<anee>();
+        while(resultSet.next()){
+            anee tee = new anee();
+            for (int i = 0; i < rsmd.getColumnCount(); i++) {
+                Object value = resultSet.getObject(i + 1);
+                Field field = tee.getClass().getDeclaredField(rsmd.getColumnName(i + 1));   //get the field             
+                Class<?> teep = field.getType();
+                try {
+                    // Object tempf = teep.cast(value);
+                    field.set(tee, value);
+                } catch (Exception e) {
+                    System.out.println(e);
+                    //TODO: handle exception
+                }
+            }
+            te.add(tee);
+
+        }
+        for(anee t : te){
+            System.out.println("actor_id: " +t.actor_id);
+            System.out.println("first_name: " +t.first_name);
+            System.out.println("last_name: " +t.last_name);
+            System.out.println("last_update: " +t.last_update);
+            System.out.println("<--------------------->");
+        }
+        // te.length();
+        
+
+    }
+        catch(Exception e) {
+            e.printStackTrace();
+            // System.out.println(e.);
+        }
         // QueryObject queryObject = library.xmlParser.getQueryObject("findMovies");
         // String finalQuery = library.populateQuery(queryObject, new anee());
         // System.out.println(finalQuery);
@@ -155,29 +206,26 @@ public class Library implements SqlRunner {
         // e.printStackTrace();
         // }
         // try (
-            // Statement statement;
-            // statement = library.connection.createStatement();
-            // ResultSet resultSet = statement.executeQuery(finalQuery);
             // } catch (SQLException e) {
                 // // TODO Auto-generated catch block
                 // e.printStackTrace();
                 // }
-                Library temp = new Library(null, "fdsa");
+                // Library temp = new Library(null, "fdsa");
                 
-                QueryObject qObj = new QueryObject(
-                    "findMovies",
-                    "java.lang.String",
-                    "SELECT a, b, c FROM my_table WHERE x=${value};"
+                // QueryObject qObj = new QueryObject(
+                //     "findMovies",
+                //     "java.lang.String",
+                //     "SELECT a, b, c FROM my_table WHERE x=${value};"
                     
-                );
-                Integer [] aa = {1,2,3};
-                String [] bb = {"a","b","c"};
-                // char [] bb = {};
+                // );
+                // Integer [] aa = {1,2,3};
+                // String [] bb = {"a","b","c"};
+                // // char [] bb = {};
 
-                String query = temp.populateQuery(qObj,aa);
-                System.out.println(query);
-                query = temp.populateQuery(qObj,bb);
-                System.out.println(query);
+                // String query = temp.populateQuery(qObj,aa);
+                // System.out.println(query);
+                // query = temp.populateQuery(qObj,bb);
+                // System.out.println(query);
                     // System.out.println((((Object) eef), q, "id"));
         // int[] arr = { 2, 3, 4};
         // ArrayList<String> list = new ArrayList<String>();
@@ -204,37 +252,30 @@ public class Library implements SqlRunner {
         try {
             ResultSet resultSet = this.runSelectQuery(queryId, queryParam);
             ResultSetMetaData resultMeta = resultSet.getMetaData();
-            int columnCount = resultMeta.getColumnCount();
-            resultSet.last();
-            int resultCount = resultSet.getRow();
-            if (resultCount == 0) {
-                return null;
-            } else if (resultCount == 1) {
-                resultSet.first();
-                String[] columnNames = new String[columnCount];
-                Field[] fields = resultType.getDeclaredFields();
-                for (int i = 1; i <= columnCount; i++) {
-                    // field.set(classObject, value);
-                    columnNames[i - 1] = resultMeta.getColumnName(i);
-                    System.out.println(columnNames[i - 1]);
-                }
-
-                for (int i = 0; i < columnCount; i++) {
+            R returnPOJO = resultType.getDeclaredConstructor().newInstance(); 
+            if(resultSet.next()){
+                for (int i = 0; i < resultMeta.getColumnCount(); i++) {
                     Object value = resultSet.getObject(i + 1);
-                    fields[i].getClass().cast(value);
+                    Field field = resultType.getDeclaredField(resultMeta.getColumnName(i + 1));   //get the field             
+                    field.set(returnPOJO, value);
                 }
-                R result = resultType.getDeclaredConstructor().newInstance();
-                return result;
-
-            } else {
-                throw new MultipleResultsFound(queryId);
+                if(resultSet.next()){
+                    throw new MultipleResultsFound(queryId);
+                }
+                else{
+                    return returnPOJO;
+                }
             }
-
-        } catch (ClassCastException | IllegalArgumentException | SecurityException | InstantiationException
+            else{
+                return null;
+            }
+        }  
+        catch (ClassCastException | IllegalArgumentException | SecurityException | InstantiationException
                 | SQLException
-                | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                | IllegalAccessException |NoSuchFieldException | InvocationTargetException
+                | NoSuchMethodException e) {
             throw new RuntimeException(e);
-        }
+        } 
 
     }
 
@@ -242,17 +283,25 @@ public class Library implements SqlRunner {
     public <T, R> List<R> selectMany(String queryId, T queryParam, Class<R> resultType) {
         try {
             ResultSet resultSet = this.runSelectQuery(queryId, queryParam);
-            List<R> result = new ArrayList<R>();
-
-            while (resultSet.next()) {
-                R newR = resultType.getDeclaredConstructor().newInstance();
-                result.add(newR);
+            ResultSetMetaData resultMeta = resultSet.getMetaData();
+            List<R> parsedOutput= new ArrayList<R>();
+            while(resultSet.next()){
+                R tempPOJO = resultType.getDeclaredConstructor().newInstance(); 
+                for (int i = 0; i < resultMeta.getColumnCount(); i++) {
+                    Object value = resultSet.getObject(i + 1);
+                    Field field = resultType.getDeclaredField(resultMeta.getColumnName(i + 1));   //get the field             
+                    field.set(tempPOJO, value);
+                }
+                parsedOutput.add(tempPOJO);
             }
-            return result;
-        } catch (IllegalArgumentException | SecurityException | SQLException | InstantiationException
-                | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            return parsedOutput;   
+        }  
+        catch (ClassCastException | IllegalArgumentException | SecurityException | InstantiationException
+                | SQLException
+                | IllegalAccessException |NoSuchFieldException | InvocationTargetException
+                | NoSuchMethodException e) {
             throw new RuntimeException(e);
-        }
+        } 
     }
 
     public <T> int runCountQuery(String queryId, T queryParam) {

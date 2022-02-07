@@ -1,10 +1,13 @@
 package assignment_1;
 
-public class anee{
-    public String prop_X = "2019csb9545";
-    public int prop_Y = 2;
-}
+import java.util.Date;
 
+public class anee{
+    public int actor_id;
+    public String first_name;
+    public String last_name;
+    public Date last_update;
+}
 
 
 
@@ -309,4 +312,71 @@ public class anee{
 //             throw (new RuntimeException(e));
 //         }
 //     }
+// }
+
+
+// public <T> Class<?> toClass(int type, T object) {
+//     Class<?> result = Object.class;
+
+//     switch (type) {
+//         case Types.CHAR:
+//         case Types.VARCHAR:
+//         case Types.LONGVARCHAR:
+//             result = String.class;
+//             break;
+
+//         case Types.NUMERIC:
+//         case Types.DECIMAL:
+//             result = java.math.BigDecimal.class;
+//             break;
+
+//         case Types.BIT:
+//             result = Boolean.class;
+//             break;
+
+//         case Types.TINYINT:
+//             result = Byte.class;
+//             break;
+
+//         case Types.SMALLINT:
+//             result = Short.class;
+//             break;
+
+//         case Types.INTEGER:
+//             result = Integer.class;
+//             break;
+
+//         case Types.BIGINT:
+//             result = Long.class;
+//             break;
+
+//         case Types.REAL:
+//         case Types.FLOAT:
+//             result = Float.class;
+//             break;
+
+//         case Types.DOUBLE:
+//             result = Double.class;
+//             break;
+
+//         case Types.BINARY:
+//         case Types.VARBINARY:
+//         case Types.LONGVARBINARY:
+//             result = Byte[].class;
+//             break;
+
+//         case Types.DATE:
+//             result = java.sql.Date.class;
+//             break;
+
+//         case Types.TIME:
+//             result = java.sql.Time.class;
+//             break;
+
+//         case Types.TIMESTAMP:
+//             result = java.sql.Timestamp.class;
+//             break;
+//     }
+
+//     return result;
 // }
