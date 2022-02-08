@@ -17,4 +17,20 @@
    <sql id="testSix" paramType="assignment_1.test_five">
       <![CDATA[SELECT actor_id FROM actor WHERE first_name =${first_name} and last_name=${last_name};]]>
    </sql>
+   <sql id="testSeven" paramType="java.util.HashMap">
+      <![CDATA[SELECT actor_id FROM actor WHERE first_name =${value};]]>
+   </sql>
+   <sql id="testEight" paramType="java.lang.String">
+      <![CDATA[UPDATE actor SET first_name = ${value} WHERE first_name ="RandomTest";]]>
+   </sql>
+   <sql id="testNine" paramType="java.lang.String">
+      <![CDATA[DELETE FROM actor WHERE first_name =${value};]]>
+   </sql>
+   <sql id="testTen" paramType="java.lang.String">
+      <![CDATA[UPDATE TABLE actor SET first_name = ${value} WHERE first_name ="RandomTest";]]>
+   </sql>
+
+   <sql id="testEleven" paramType="java.lang.String">
+      <![CDATA[SELECT TABLE * FROM actor WHERE first_name=${value};]]>
+   </sql>
 </queries>

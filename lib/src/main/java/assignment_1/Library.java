@@ -96,14 +96,19 @@ public class Library implements SqlRunner {
                 R returnPOJO = fillPOJO(resultSet, resultMeta, resultType);
                 // in case more than one result is found
                 if (resultSet.next()) {
-                    throw new MultipleResultsFound(queryId);
+                    throw (new MultipleResultsFound(queryId));
                 } else {
                     return returnPOJO;
                  }
             } else {
                 return null;
             }
-        } catch (Exception e) {
+
+        }
+        catch(MultipleResultsFound E){
+            throw E;
+        }
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
 

@@ -3,8 +3,7 @@
  */
 package assignment_1;
 
-import assignment_1.exceptions.ParamTypeDifferentException;
-import assignment_1.exceptions.QueryNotFoundException;
+import assignment_1.exceptions.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +14,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,6 +36,34 @@ class LibraryTest {
           } catch (Exception e) {
               e.printStackTrace();
           }
+    }
+
+    @Test
+    public void connectionCheckTest(){
+        assertThrows(DatabaseNotConnectedException.class, ()->{
+            new Library(null, "Fdsa").checkConnection();
+        });
+    }
+
+    @Test
+    public void insertTest() {
+        test_five queryParam = new test_five();
+        queryParam.first_name = "RandomTest";
+        queryParam.last_name = "test";
+        String queryId = "testFour";
+        for(int i = 5000;i<5010;i++) {
+            queryParam.actor_id = i;
+            int Result= library.insert(queryId, queryParam);
+            assertEquals(Result, 1);
+
+        }
+        assertThrows(ParamTypeDifferentException.class,  () -> {
+            library.insert("testFive", queryParam);
+        });
+
+        assertThrows(QueryNotFoundException.class,  () -> {
+            library.insert("testRandom", queryParam);
+        });
     }
 
     @Test
@@ -68,7 +96,8 @@ class LibraryTest {
             assertEquals(Result.actor_id, 197);
      }
 
-     @Test void selectOneTestThree(){
+     @Test
+     void selectOneTestThree(){
          test_five queryParam = new test_five();
          queryParam.actor_id = 5001;
          queryParam.first_name = "REESE";
@@ -78,22 +107,65 @@ class LibraryTest {
          assertEquals(Result.actor_id, 197);
      }
 
+    @Test
+    public void selectOneTestFour (){
+        String queryParam = "JOHN";
+        String queryId = "testOne";
+        assertThrows(RuntimeException.class, ()->{
+            library.selectOne(queryId, queryParam, test_two.class);
+        });
+    }
+
      @Test
-     public void insertTest() {
-        test_five queryParam = new test_five();
-        queryParam.actor_id = 5003;
-        queryParam.first_name = "Aneeket";
-        queryParam.last_name = "Mangal";
-        String queryId = "testFour";
-
-         int Result= library.insert(queryId, queryParam);
-         assertEquals(Result, 1);
-         assertThrows(ParamTypeDifferentException.class,  () -> {
-             library.insert("testFive", queryParam);
+     void SQLExceptionCheckCount(){
+         String test = "TestCheck";
+         assertThrows(RuntimeException.class, ()->{
+             library.update("testTen", test);
          });
 
-         assertThrows(QueryNotFoundException.class,  () -> {
-             library.insert("testRandom", queryParam);
+     }
+
+    @Test
+    void SQLExceptionCheckSelect(){
+        String test = "TestCheck";
+        assertThrows(RuntimeException.class, ()->{
+            library.selectOne("testEleven", test, test_two.class);
+        });
+    }
+
+     @Test
+     void testUnsupportedType(){
+         HashMap<String, String> test = new HashMap<>();
+         test.put("test", "test");
+         System.out.println(test.getClass());
+
+         assertThrows(RuntimeException.class,  () -> {
+             library.selectOne("testSix", test, test_two.class);
          });
+
+     }
+
+     @Test
+     public void testMultipleTypesInSelectOne(){
+         String[] queryParam = {"JOHN", "REESE"};
+         String queryId = "testTwo";
+         assertThrows(MultipleResultsFound.class,  () -> {
+             library.selectOne(queryId, queryParam, test_two.class);
+         });
+     }
+
+
+     @Test
+     public void updateTest(){
+        String test = "RandomTestUpdate";
+        int Result= library.update("testEight", test);
+        assertEquals(Result, 10);
+
+     }
+     @Test
+    public void deleteTest(){
+         String test = "RandomTestUpdate";
+         int Result= library.delete("testNine", test);
+         assertEquals(Result, 10);
      }
 }
