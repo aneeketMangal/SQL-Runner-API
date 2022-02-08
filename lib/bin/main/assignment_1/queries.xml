@@ -1,5 +1,0 @@
-<queries>
-   <sql id="findMovies" paramType="assignment_1.anee">
-      <![CDATA[SELECT * FROM enrol WHERE student_id=${propX} AND offering_id=${propY};]]>
-   </sql>
-</queries>

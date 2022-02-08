@@ -1,0 +1,20 @@
+<queries>
+   <sql id="testOne" paramType="java.lang.String">
+      <![CDATA[SELECT * FROM actor WHERE first_name=${value};]]>
+   </sql>
+   <sql id="testTwo" paramType="[Ljava.lang.String;">
+      <![CDATA[SELECT actor_id FROM actor WHERE first_name IN${value};]]>
+   </sql>
+   <sql id="testThree" paramType="assignment_1.test_three">
+      <![CDATA[SELECT actor_id FROM actor WHERE first_name IN${propOne} and last_name=${propTwo};]]>
+   </sql>
+   <sql id="testFour" paramType="assignment_1.test_five">
+      <![CDATA[INSERT INTO actor(actor_id, first_name, last_name) VALUES (${actor_id}, ${first_name}, ${last_name});]]>
+   </sql>
+   <sql id="testFive" paramType="random">
+      <![CDATA[INSERT INTO actor(actor_id, first_name, last_name) VALUES (${actor_id}, ${first_name}, ${last_name});]]>
+   </sql>
+   <sql id="testSix" paramType="assignment_1.test_five">
+      <![CDATA[SELECT actor_id FROM actor WHERE first_name =${first_name} and last_name=${last_name};]]>
+   </sql>
+</queries>

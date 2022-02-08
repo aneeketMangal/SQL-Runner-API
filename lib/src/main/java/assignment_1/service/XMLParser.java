@@ -2,7 +2,6 @@ package assignment_1.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -27,11 +26,6 @@ public class XMLParser{
         // filePath = "C:\\Users\\lenovo\\Desktop\\Adhoora\\academics\\year3\\cs305\\app\\src\\main\\java\\test.xml";
     }
 
-    public static void main(String[] args){
-        XMLParser xmlParser = new XMLParser("C:\\Users\\lenovo\\Desktop\\Adhoora\\academics\\year3\\software\\cs305_2022\\lib\\src\\test\\resources\\test.xml");
-        QueryObject qObj = xmlParser.getQueryObject("findMovies");
-        System.out.println(qObj.query);
-    }
 
     public QueryObject getQueryObject(String queryId){
         // Instantiate the Factory
@@ -63,19 +57,13 @@ public class XMLParser{
                         
 
                         // Creating a Query object to store the parsed result
-                        return new QueryObject(
-                            id, 
-                            paramType, 
-                            sqlQuery
+                        return new QueryObject(id, paramType, sqlQuery
                         );
                     }
                 }
             }
             // Handling exception in case no query is found with the given id
-            throw(new QueryNotFoundException(
-                queryId,
-                this.filePath
-            ));
+            throw(new QueryNotFoundException(queryId, this.filePath));
 
         } catch (ParserConfigurationException | SAXException | IOException e) {
            throw(new RuntimeException(e));

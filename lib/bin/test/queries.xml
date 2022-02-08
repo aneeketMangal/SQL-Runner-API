@@ -1,0 +1,11 @@
+<queries>
+   <sql id="testOne" paramType="java.lang.String">
+      <![CDATA[SELECT * FROM actor WHERE first_name=${value};]]>
+   </sql>
+   <sql id="testTwo" paramType="[Ljava.lang.String;">
+      <![CDATA[SELECT actor_id FROM actor WHERE first_name IN${value};]]>
+   </sql>
+   <sql id="testThree" paramType="[Ljava.lang.String;">
+      <![CDATA[SELECT actor_id FROM actor WHERE first_name IN${propOne} and last_name=${propTwo};]]>
+   </sql>
+</queries>

@@ -78,7 +78,7 @@ public class anee{
 //     }
 
 //     public <T> String populateQuery(QueryObject qObj, T queryParam) {
-//         // TODO: Implement this method
+//         // TUDU: Implement this method
 //         // this.checkParamTypes(qObj, queryParam);
 
 //         String populatedQuery = qObj.query;
@@ -153,7 +153,7 @@ public class anee{
 //         // try {
 //         //     Class.forName("com.mysql.cj.jdbc.Driver");
 //         // } catch (ClassNotFoundException e) {
-//         //     // TODO Auto-generated catch block
+//         //     // TUDU Auto-generated catch block
 //         //     e.printStackTrace();
 //         // }  
 //         // Connection c;
@@ -165,7 +165,7 @@ public class anee{
 //         //     String finalQuery = library.populateQuery(queryObject, new anee());
 //         //     System.out.println(finalQuery);
 //         // } catch (SQLException e) {
-//         //     // TODO Auto-generated catch block
+//         //     // TUDU Auto-generated catch block
 //         //     e.printStackTrace();
 //         // }  
 //         // try (
@@ -173,7 +173,7 @@ public class anee{
 //         //     statement = library.connection.createStatement();
 //         //     ResultSet resultSet = statement.executeQuery(finalQuery);
 //         // } catch (SQLException e) {
-//         //     // TODO Auto-generated catch block
+//         //     // TUDU Auto-generated catch block
 //         //     e.printStackTrace();
 //         // }
 
@@ -379,4 +379,156 @@ public class anee{
 //     }
 
 //     return result;
+// }
+
+
+// public static void main(String[] args) throws ClassNotFoundException {
+
+//     // Integer a = 5;
+//     // int b = 3;
+//     // String c = "hello";
+//     // anee d = new anee();
+//     // Boolean dd = true;
+//     // float ee = 23.4f;
+//     // double ff = 23.4;
+//     // String[] e = { "anee", "temp", "funny" };
+//     // Integer[] eef = { 1, 2, 3 };
+//     // char[] eeef = { 'a', 'b', 'c' };
+//     // String q = "SELECT * FROM books WHERE id = ${id};";
+//     // ReplaceUtility rr = new ReplaceUtility();
+
+//     // Collection<String> collection = new PriorityQueue<String>();
+
+//     // System.out.println(collection.getClass().getName());
+//     // collection.add("anee");
+//     // collection.add("gunny");
+//     // collection.add("temp");
+
+//     // Iterator<?> iterator = collection.iterator();
+
+//     // // while loop
+//     // while (iterator.hasNext()) {
+//     // System.out.println("value= " + iterator.next().getClass().getName());
+
+//     // }
+
+//     // System.out.println(rr.replaceUtility(((Object)e), q, "id"));
+
+//     // System.out.println(rr.replaceUtility(((Object)dd).getClass().getName(), q,
+//     // "id", "1"));
+//     // System.out.println(rr.replaceUtility(((Object)ee).getClass().getName(), q,
+//     // "id", "1"));
+//     // System.out.println(rr.replaceUtility(((Object)ff).getClass().getName(), q,
+//     // "id", "1"));
+
+//     // try {
+//     // Class.forName("com.mysql.cj.jdbc.Driver");
+//     // } catch (ClassNotFoundException e) {
+//     // // TUDU Auto-generated catch block
+//     // e.printStackTrace();
+//     // }
+//     Class.forName("com.mysql.cj.jdbc.Driver");  
+//     Connection c;
+//     System.out.println("fds");
+//     try {
+//     c =
+//     DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/sakila?allowPublicKeyRetrieval=true&user=root&password=papamangal&useSSL=false");
+//     Library library = new Library(c,
+//     "src/main/resources/assignment_1/queries.xml");
+
+    
+
+//     Statement statement;
+//     String finalQuery = "SELECT * from actor where first_name = \"MINNIE\"";
+//     statement = library.connection.createStatement();
+//     ResultSet resultSet = statement.executeQuery(finalQuery);
+//     // resultSet.first();
+//     ResultSetMetaData rsmd = resultSet.getMetaData();
+//     for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+//         // field.set(classObject, value);
+        
+//         System.out.println(rsmd.getColumnName(i));
+        
+//     }
+//     Date temp;
+//     List<anee> te = new ArrayList<anee>();
+//     while(resultSet.next()){
+//         anee tee = new anee();
+//         for (int i = 0; i < rsmd.getColumnCount(); i++) {
+//             Object value = resultSet.getObject(i + 1);
+//             Field field = tee.getClass().getDeclaredField(rsmd.getColumnName(i + 1));   //get the field             
+//             Class<?> teep = field.getType();
+//             try {
+//                 // Object tempf = teep.cast(value);
+//                 field.set(tee, value);
+//             } catch (Exception e) {
+//                 System.out.println(e);
+//                 //TUDU: handle exception
+//             }
+//         }
+//         te.add(tee);
+
+//     }
+//     for(anee t : te){
+//         System.out.println("actor_id: " +t.actor_id);
+//         System.out.println("first_name: " +t.first_name);
+//         System.out.println("last_name: " +t.last_name);
+//         System.out.println("last_update: " +t.last_update);
+//         System.out.println("<--------------------->");
+//     }
+//     // te.length();
+    
+
+// }
+//     catch(Exception e) {
+//         e.printStackTrace();
+//         // System.out.println(e.);
+//     }
+//     // QueryObject queryObject = library.xmlParser.getQueryObject("findMovies");
+//     // String finalQuery = library.populateQuery(queryObject, new anee());
+//     // System.out.println(finalQuery);
+//     // } catch (SQLException e) {
+//     // // TUDU Auto-generated catch block
+//     // e.printStackTrace();
+//     // }
+//     // try (
+//         // } catch (SQLException e) {
+//             // // TUDU Auto-generated catch block
+//             // e.printStackTrace();
+//             // }
+//             // Library temp = new Library(null, "fdsa");
+            
+//             // QueryObject qObj = new QueryObject(
+//             //     "findMovies",
+//             //     "java.lang.String",
+//             //     "SELECT a, b, c FROM my_table WHERE x=${value};"
+                
+//             // );
+//             // Integer [] aa = {1,2,3};
+//             // String [] bb = {"a","b","c"};
+//             // // char [] bb = {};
+
+//             // String query = temp.populateQuery(qObj,aa);
+//             // System.out.println(query);
+//             // query = temp.populateQuery(qObj,bb);
+//             // System.out.println(query);
+//                 // System.out.println((((Object) eef), q, "id"));
+//     // int[] arr = { 2, 3, 4};
+//     // ArrayList<String> list = new ArrayList<String>();
+//     // list.add("anee");
+//     // System.out.println(new Library(null, "").populateQuery(qObj, arr));
+
+//     // ArrayList<String> list = new ArrayList<String>();
+//     // list.add("aneeket");
+//     // list.add("banawat");
+//     // String[] arr = new String[2];
+//     // arr[0] = "anee";
+//     // arr[1] = "temp";
+
+//     // System.out.println(Arrays.toString(list.toArray()));
+//     // System.out.println(arr.getClass().isArray() + " ---" + Arrays.toString(arr));
+//     // boolean isCollection = Collection.class.isAssignableFrom(list.getClass());
+
+//     // System.out.println(isCollection);
+//     // System.out.println(a.getClass().getSimpleName() + " --" +a.toString());
 // }
