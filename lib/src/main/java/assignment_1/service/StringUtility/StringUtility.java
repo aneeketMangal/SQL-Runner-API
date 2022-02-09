@@ -18,7 +18,7 @@ public class StringUtility extends TypeCheckUtility{
     }
 
     public String replaceArray(String populatedQuery, String old, Object queryParam){
-        try {
+
             int temp = Array.getLength(queryParam);
             StringBuilder arrayStringBuilder = new StringBuilder("(");
             for (int i = 0; i < temp; i++) {
@@ -35,14 +35,11 @@ public class StringUtility extends TypeCheckUtility{
             arrayString = arrayString + ")";
             return replacePrimitives(populatedQuery, old, arrayString);
         }
-        catch(Exception e){
-            throw new RuntimeException(e);
-        }
-    }
+
+
 
     public String replaceCollection(String populatedQuery, String old, Object queryParam) {
         // returns in the format of [1,2,3]
-        try {
             String arrayString = "(";
             for (Object objectInIterable : (Iterable<?>) queryParam) {
                 if (isStringType(objectInIterable)) {
@@ -57,10 +54,7 @@ public class StringUtility extends TypeCheckUtility{
             // arrayString = arrayString.substring(0, arrayString.length());
             arrayString = arrayString + ")";
             return replacePrimitives(populatedQuery, old, arrayString);
-        }
-        catch (Exception e){
-            throw(new RuntimeException(e));
-        }
+
     }
 
     public <T> String replaceUtility(T queryParam, String populatedQuery, String old, boolean checkComponent) {
@@ -86,18 +80,24 @@ public class StringUtility extends TypeCheckUtility{
         String paramType = queryParam.getClass().getName();
         String paramTypeInXML = qObj.paramType;
         if (!paramType.equals(paramTypeInXML)) {
-            throw new ParamTypeDifferentException(paramType, paramType, qObj.id);
+            throw new ParamTypeDifferentException(paramTypeInXML, paramType, qObj.id);
         }
     }
 
     public <T> String populateQuery(QueryObject qObj, T queryParam) {
+        // check for query with no parameter
+        if(queryParam == null){
+            if(qObj.paramType.equals("null"))
+                return qObj.query;
+            else
+                throw new ParamTypeDifferentException(qObj.paramType, "null Java Object provided", qObj.id);
+        }
          this.checkParamTypes(qObj, queryParam);
 
         String populatedQuery = qObj.query;
-        Object paramObject = (Object) queryParam;
 
         try {
-            return this.replaceUtility(paramObject, populatedQuery, "value", true);
+            return this.replaceUtility((Object) queryParam, populatedQuery, "value", true);
         } catch (NotAComponentTypeException e) {
             // fetching the fields of the class
             try {
@@ -109,13 +109,8 @@ public class StringUtility extends TypeCheckUtility{
                     String fieldName = field.getName();
                     if(populatedQuery.contains("${" + fieldName + "}")){
                         populatedQuery = this.replaceUtility(fieldObject, populatedQuery, fieldName, false);
-                    }
-                    else{
-                        continue;
-                    }
-                }
+                    }}
                 return populatedQuery;
-
             }
             catch (Exception ee){
                 throw new RuntimeException(ee);

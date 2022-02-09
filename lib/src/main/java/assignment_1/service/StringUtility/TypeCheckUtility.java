@@ -49,6 +49,6 @@ public class TypeCheckUtility {
      */
 
     public static boolean isStringType(Object check) {
-        return check.getClass().getName() == "java.lang.String"|| check.getClass().getName() == "java.lang.Character";
+        return check.getClass().getName() == "java.lang.String"|| check.getClass().getName() == "java.lang.Character" || check.getClass().getName() == "java.util.data";
     }
 }

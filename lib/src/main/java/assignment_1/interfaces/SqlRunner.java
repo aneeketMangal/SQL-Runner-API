@@ -9,17 +9,17 @@ public interface SqlRunner {
      *                   populating it with the data returned by the SQL.
      * @return The object populated with the SQL results.
      */
-    <T, R> R selectOne(String queryId, T queryParam, Class<R> resultType) throws Exception;
+    <T, R> R selectOne(String queryId, T queryParam, Class<R> resultType);
     /**
      * Same as {@link #selectOne(String, Object, Class)} except that this one
      * returns multiple rows.
      * @param queryId
      * @param queryParam
-     * @param resultItemType
+     * @param resultType
      * @return
      */
     
-    <T, R> List<R> selectMany(String queryId, T queryParam, Class<R> resultType) throws Exception;
+    <T, R> List<R> selectMany(String queryId, T queryParam, Class<R> resultType);
     /**
      * Execute an update statement and return the number of rows affected.
      * @param queryId

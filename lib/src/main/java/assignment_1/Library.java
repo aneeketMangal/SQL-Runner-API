@@ -3,9 +3,7 @@
  */
 package assignment_1;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -14,9 +12,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import assignment_1.exceptions.DatabaseNotConnectedException;
-import assignment_1.exceptions.MultipleResultsFound;
-import assignment_1.exceptions.ParamTypeDifferentException;
+import assignment_1.exceptions.CannotConnectToDatabaseException;
+import assignment_1.exceptions.MultipleResultsFoundException;
 import assignment_1.interfaces.SqlRunner;
 import assignment_1.model.QueryObject;
 import assignment_1.service.XMLParser;
@@ -28,6 +25,7 @@ public class Library implements SqlRunner {
     public String xmlFilePath;
     public XMLParser xmlParser;
     public StringUtility stringUtility;
+    public Statement statement;
 
     // Constructor for library Object
     public Library(Connection connection, String filePath) {
@@ -35,38 +33,33 @@ public class Library implements SqlRunner {
         this.xmlFilePath = filePath;
         this.xmlParser = new XMLParser(this.xmlFilePath);
         this.stringUtility = new StringUtility();
-    }
-
-    // Method to check if the connection object is present
-    public void checkConnection() {
-        if (connection == null) {
-            throw new DatabaseNotConnectedException("Database not connected");
+        try{
+            this.statement = this.connection.createStatement();
+        }
+        catch(Exception E){
+            throw new CannotConnectToDatabaseException(E);
         }
     }
 
+    public <T> String getPopulatedQuery(String queryId, T queryParam){
+        QueryObject queryObject = this.xmlParser.getQueryObject(queryId);
+        return stringUtility.populateQuery(queryObject, queryParam);
+    }
+
+
     public <T> int runCountQuery(String queryId, T queryParam) {
+        String populatedQuery = getPopulatedQuery(queryId, queryParam);
         try {
-            this.checkConnection();
-            QueryObject queryObject = this.xmlParser.getQueryObject(queryId);
-            String finalQuery = stringUtility.populateQuery(queryObject, queryParam);
-            Statement statement;
-            statement = this.connection.createStatement();
-            int countAffectedRows = statement.executeUpdate(finalQuery);
-            return countAffectedRows;
+            return statement.executeUpdate(populatedQuery);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     public <T> ResultSet runSelectQuery(String queryId, T queryParam) {
+        String populatedQuery = getPopulatedQuery(queryId, queryParam);
         try {
-            this.checkConnection();
-            QueryObject queryObject = this.xmlParser.getQueryObject(queryId);
-            String finalQuery = stringUtility.populateQuery(queryObject, queryParam);
-            Statement statement;
-            statement = this.connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(finalQuery);
-            return resultSet;
+            return statement.executeQuery(populatedQuery);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -89,14 +82,14 @@ public class Library implements SqlRunner {
 
     @Override
     public <T, R> R selectOne(String queryId, T queryParam, Class<R> resultType) {
+        ResultSet resultSet = this.runSelectQuery(queryId, queryParam);
         try {
-            ResultSet resultSet = this.runSelectQuery(queryId, queryParam);
             ResultSetMetaData resultMeta = resultSet.getMetaData();
             if (resultSet.next()) {
                 R returnPOJO = fillPOJO(resultSet, resultMeta, resultType);
                 // in case more than one result is found
                 if (resultSet.next()) {
-                    throw (new MultipleResultsFound(queryId));
+                    throw (new MultipleResultsFoundException(queryId));
                 } else {
                     return returnPOJO;
                  }
@@ -105,7 +98,7 @@ public class Library implements SqlRunner {
             }
 
         }
-        catch(MultipleResultsFound E){
+        catch(MultipleResultsFoundException E){
             throw E;
         }
         catch (Exception e) {
@@ -116,8 +109,8 @@ public class Library implements SqlRunner {
 
     @Override
     public <T, R> List<R> selectMany(String queryId, T queryParam, Class<R> resultType) {
+        ResultSet resultSet = this.runSelectQuery(queryId, queryParam);
         try {
-            ResultSet resultSet = this.runSelectQuery(queryId, queryParam);
             ResultSetMetaData resultMeta = resultSet.getMetaData();
             List<R> parsedOutput = new ArrayList<R>();
             while (resultSet.next()) {
@@ -125,23 +118,17 @@ public class Library implements SqlRunner {
                 parsedOutput.add(tempPOJO);
             }
             return parsedOutput;
-        } catch (ClassCastException | IllegalArgumentException | SecurityException | SQLException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public <T> int insert(String queryId, T queryParam) {
-        return this.runCountQuery(queryId, queryParam);
-    }
+    public <T> int insert(String queryId, T queryParam) {return this.runCountQuery(queryId, queryParam);}
 
     @Override
-    public <T> int delete(String queryId, T queryParam) {
-        return this.runCountQuery(queryId, queryParam);
-    }
+    public <T> int delete(String queryId, T queryParam) {return this.runCountQuery(queryId, queryParam);}
 
     @Override
-    public <T> int update(String queryId, T queryParam) {
-        return this.runCountQuery(queryId, queryParam);
-    }
+    public <T> int update(String queryId, T queryParam) {return this.runCountQuery(queryId, queryParam);}
 }

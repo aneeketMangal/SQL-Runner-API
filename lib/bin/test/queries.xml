@@ -5,7 +5,44 @@
    <sql id="testTwo" paramType="[Ljava.lang.String;">
       <![CDATA[SELECT actor_id FROM actor WHERE first_name IN${value};]]>
    </sql>
-   <sql id="testThree" paramType="[Ljava.lang.String;">
+   <sql id="testThree" paramType="assignment_1.test_class.test_three">
       <![CDATA[SELECT actor_id FROM actor WHERE first_name IN${propOne} and last_name=${propTwo};]]>
+   </sql>
+   <sql id="testFour" paramType="assignment_1.test_class.test_five">
+      <![CDATA[INSERT INTO actor(actor_id, first_name, last_name) VALUES (${actor_id}, ${first_name}, ${last_name});]]>
+   </sql>
+   <sql id="testFive" paramType="random">
+      <![CDATA[INSERT INTO actor(actor_id, first_name, last_name) VALUES (${actor_id}, ${first_name}, ${last_name});]]>
+   </sql>
+   <sql id="testSix" paramType="assignment_1.test_class.test_five">
+      <![CDATA[SELECT actor_id FROM actor WHERE first_name =${first_name} and last_name=${last_name};]]>
+   </sql>
+   <sql id="testSeven" paramType="java.util.HashMap">
+      <![CDATA[SELECT actor_id FROM actor WHERE first_name =${value};]]>
+   </sql>
+   <sql id="testEight" paramType="java.lang.String">
+      <![CDATA[UPDATE actor SET first_name = ${value} WHERE first_name ="RandomTest";]]>
+   </sql>
+   <sql id="testNine" paramType="java.lang.String">
+      <![CDATA[DELETE FROM actor WHERE first_name =${value};]]>
+   </sql>
+   <sql id="testTen" paramType="java.lang.String">
+      <![CDATA[UPDATE TABLE actor SET first_name = ${value} WHERE first_name ="RandomTest";]]>
+   </sql>
+
+   <sql id="testEleven" paramType="java.lang.String">
+      <![CDATA[SELECT TABLE * FROM actor WHERE first_name=${value};]]>
+   </sql>
+   <sql id="testTwelve" paramType="assignment_1.test_class.test_six">
+      <![CDATA[INSERT INTO actor(actor_id, first_name, last_name) VALUES ${state_1}, ${state_2};]]>
+   </sql>
+   <sql id="testThirteen" paramType="[I">
+      <![CDATA[DELETE FROM actor WHERE actor_id IN${value};]]>
+   </sql>
+   <sql id="testFourteen" paramType="null">
+      <![CDATA[SELECT actor_id FROM actor where first_name = "JOHN";]]>
+   </sql>
+   <sql id="testFifteen" paramType="notNull">
+      <![CDATA[DELETE FROM actor WHERE first_name = "JOHN";]]>
    </sql>
 </queries>

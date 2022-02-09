@@ -4,8 +4,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import assignment_1.exceptions.QueryNotFoundException;
 import assignment_1.model.QueryObject;
-import assignment_1.service.XMLParser;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 

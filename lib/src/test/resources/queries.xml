@@ -39,4 +39,10 @@
    <sql id="testThirteen" paramType="[I">
       <![CDATA[DELETE FROM actor WHERE actor_id IN${value};]]>
    </sql>
+   <sql id="testFourteen" paramType="null">
+      <![CDATA[SELECT actor_id FROM actor where first_name = "JOHN";]]>
+   </sql>
+   <sql id="testFifteen" paramType="notNull">
+      <![CDATA[DELETE FROM actor WHERE first_name = "JOHN";]]>
+   </sql>
 </queries>

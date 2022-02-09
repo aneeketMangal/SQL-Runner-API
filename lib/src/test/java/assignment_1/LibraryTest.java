@@ -9,6 +9,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.*;
@@ -21,13 +23,24 @@ class LibraryTest {
     public Connection c;
     @BeforeEach
     void setUp(){
-          try {
+        Properties props = new Properties();
+        InputStream inputStream = ClassLoader.getSystemResourceAsStream("test.properties");
+        try {
+            props.load(inputStream);
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Cannot read properties file");
+        }
+        try {
               Class.forName("com.mysql.cj.jdbc.Driver");
           } catch (ClassNotFoundException e) {
               e.printStackTrace();
           }
           try {
-              c = DriverManager.getConnection("jdbc:mysql://localhost:3306/sakila?user=root&password=papamangal&useUnicode=true&characterEncoding=UTF-8&useSSL=false&autocommit=false");
+              c = DriverManager.getConnection("jdbc:mysql://localhost:3306/sakila?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autocommit=false",
+                      props.get("user").toString(),
+                      props.get("password").toString()
+              );
               library = new Library(c,
                       "C:\\Users\\lenovo\\Desktop\\Adhoora\\academics\\year3\\software\\cs305_2022\\lib\\src\\test\\resources\\queries.xml");
           } catch (Exception e) {
@@ -79,7 +92,7 @@ class LibraryTest {
         // testing empty result (no output records)
         String queryParamTwo = "Testblech";
         test ResultTwo = library.selectOne(queryId, queryParamTwo, test.class);
-        assertTrue(ResultTwo == null);
+        assertNull(ResultTwo);
 
         // testing collection types queryParam (here ArrayList)
         test_three queryParamThree = new test_three();
@@ -124,8 +137,17 @@ class LibraryTest {
         */
         String[] queryParamSix = {"JOHN", "REESE"};
         String queryIdSix = "testTwo";
-        assertThrows(MultipleResultsFound.class,  () -> {
+        assertThrows(MultipleResultsFoundException.class,  () -> {
             library.selectOne(queryIdSix, queryParamSix, test_two.class);
+        });
+
+        /*
+        * Testing the case of SQL exception in case of
+        * invalid SQL query.
+        */
+        String test = "TestCheck";
+        assertThrows(RuntimeException.class, ()->{
+            library.selectOne("testEleven", test, test_two.class);
         });
     }
 
@@ -156,46 +178,52 @@ class LibraryTest {
         assertThrows(RuntimeException.class,  () -> {
             library.selectOne("testSix", test, test_two.class);
         });
+
+        /*
+        * The case where the query is already filled and does not
+        * have a placeholder of format ${prop}. In such case user needs
+        * to specify paramType as "null"
+        */
+
+        List<test_two> ResultFour= library.selectMany("testFourteen", null, test_two.class);
+        assertEquals(ResultFour.size(), 1);
+
+
     }
 
     @Test
-    public void update(){
+    public void update() {
         String test = "RandomTestUpdate";
-        int Result= library.update("testEight", test);
+        int Result = library.update("testEight", test);
         assertEquals(Result, 10);
 
 
         /*
-        * Testing the case where we provide
-        * invalid SQL query to update method.
-        * This will throw a RuntimeException object
-        * of type SQLException
-        */
+         * Testing the case where we provide
+         * invalid SQL query to update method.
+         * This will throw a RuntimeException object
+         * of type SQLException
+         */
         String testTwo = "TestCheck";
-        assertThrows(RuntimeException.class, ()->{
+        assertThrows(RuntimeException.class, () -> {
             library.update("testTen", testTwo);
         });
-
     }
+
     @Test
     public void delete(){
         String test = "RandomTestUpdate";
         int Result= library.delete("testNine", test);
         assertEquals(Result, 10);
-    }
 
-    @Test
-    public void connectionCheckTest(){
-        assertThrows(DatabaseNotConnectedException.class, ()->{
-            new Library(null, "randomTest").checkConnection();
-        });
-    }
+        /*
+        * Testing the case when the queryParam (object passed in the API call)
+        * is null but the paramType(i.e. FQN of class in XML is not equal
+        * to the string "null"
+        */
 
-    @Test
-    void SQLExceptionCheckSelect(){
-        String test = "TestCheck";
-        assertThrows(RuntimeException.class, ()->{
-            library.selectOne("testEleven", test, test_two.class);
+        assertThrows(ParamTypeDifferentException.class, ()->{
+            library.delete("testFifteen", null);
         });
     }
 
