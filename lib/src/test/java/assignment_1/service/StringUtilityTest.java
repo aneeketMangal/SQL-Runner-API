@@ -4,7 +4,6 @@ import assignment_1.exceptions.NotAComponentTypeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import assignment_1.Library;
 import assignment_1.service.StringUtility.StringUtility;
 
 import java.util.*;
@@ -84,12 +83,12 @@ public class StringUtilityTest {
         testNew.add("one");
         testNew.add("two");
         testNew.add("three");
-        String testResult = stringUtility.replaceUtility(testNew, testString, testOld);
+        String testResult = stringUtility.replaceUtility(testNew, testString, testOld, true);
         assertEquals(testResult, "x = (\"one\",\"two\",\"three\")");
 
         HashMap<String, String> testNewTwo= new HashMap<String, String>();
         assertThrows(NotAComponentTypeException.class,  () -> {
-            stringUtility.replaceUtility(testNewTwo, testOld, testOld);
+            stringUtility.replaceUtility(testNewTwo, testOld, testOld, true);
         });
 
     }

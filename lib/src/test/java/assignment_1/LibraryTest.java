@@ -12,10 +12,7 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -84,7 +81,6 @@ class LibraryTest {
         List<test_two> Result= library.selectMany(queryId, queryParam, test_two.class);
         assertEquals(Result.size(), 3);
     }
-
      @Test
      public void selectOneTestTwo() {
             test_three queryParam = new test_three();

@@ -11,7 +11,8 @@ public class StringUtility extends TypeCheckUtility{
     //todo: handle date
 
     public String replaceString(String populatedQuery, String old, String newValue) {
-        return populatedQuery.replace("${" + old + "}", "\"" + newValue + "\"");
+
+        return populatedQuery.replace("${" + old + "}", "\"" +newValue+ "\"");
     }
 
     public String replacePrimitives(String populatedQuery, String old, String newValue) {
@@ -49,7 +50,6 @@ public class StringUtility extends TypeCheckUtility{
                 if (isStringType(objectInIterable)) {
                     arrayString = arrayString + ("\"" + objectInIterable.toString() + "\",");
                 } else {
-                    System.out.println("fdsa");
                     arrayString += objectInIterable.toString() + ",";
                 }
             }
@@ -65,7 +65,7 @@ public class StringUtility extends TypeCheckUtility{
         }
     }
 
-    public <T> String replaceUtility(T queryParam, String populatedQuery, String old) {
+    public <T> String replaceUtility(T queryParam, String populatedQuery, String old, boolean checkComponent) {
 
         if (isStringType(queryParam)) {
             return replaceString(populatedQuery, old, queryParam.toString());
@@ -77,9 +77,11 @@ public class StringUtility extends TypeCheckUtility{
         } else if (isCollectionType(queryParam)) {
            return replaceCollection(populatedQuery, old, queryParam);
         }
-        // else if(T isinstance)
         else{
-            throw new NotAComponentTypeException();
+            if(checkComponent)
+                throw new NotAComponentTypeException();
+            else
+                return replacePrimitives(populatedQuery, old, queryParam.toString());
         }
     }
     public <T> void checkParamTypes(QueryObject qObj, T queryParam) {
@@ -91,15 +93,13 @@ public class StringUtility extends TypeCheckUtility{
     }
 
     public <T> String populateQuery(QueryObject qObj, T queryParam) {
-        // TODO: Implement this method
          this.checkParamTypes(qObj, queryParam);
 
         String populatedQuery = qObj.query;
         Object paramObject = (Object) queryParam;
 
         try {
-            populatedQuery = this.replaceUtility(paramObject, populatedQuery, "value");
-            return populatedQuery;
+            return this.replaceUtility(paramObject, populatedQuery, "value", true);
         } catch (NotAComponentTypeException e) {
             // fetching the fields of the class
             try {
@@ -109,19 +109,18 @@ public class StringUtility extends TypeCheckUtility{
                     Object fieldObject;
                     fieldObject = field.get(queryParam);
                     String fieldName = field.getName();
-                    try {
-                        populatedQuery = this.replaceUtility(fieldObject, populatedQuery, fieldName);
+                    if(populatedQuery.contains("${" + fieldName + "}")){
+                        populatedQuery = this.replaceUtility(fieldObject, populatedQuery, fieldName, false);
                     }
-                    catch (Exception E){continue;};
+                    else{
+                        continue;
+                    }
                 }
                 return populatedQuery;
             }
             catch (Exception ee){
                 throw new RuntimeException(ee);
             }
-        }
-        catch (Exception e){
-            throw new RuntimeException(e);
         }
     }
 
