@@ -21,29 +21,35 @@ class LibraryTest {
     public Library library;
     public Connection c;
     @BeforeEach
-    void init(){
+    void setUp(){
           try {
               Class.forName("com.mysql.cj.jdbc.Driver");
           } catch (ClassNotFoundException e) {
               e.printStackTrace();
           }
           try {
-              c = DriverManager.getConnection("jdbc:mysql://localhost:3306/sakila?user=root&password=papamangal&useUnicode=true&characterEncoding=UTF-8&useSSL=false");
-              library = new Library(c, "C:\\Users\\lenovo\\Desktop\\Adhoora\\academics\\year3\\software\\cs305_2022\\lib\\src\\test\\resources\\queries.xml");
+              c = DriverManager.getConnection("jdbc:mysql://localhost:3306/sakila?user=root&password=papamangal&useUnicode=true&characterEncoding=UTF-8&useSSL=false&autocommit=false");
+              library = new Library(c,
+                      "C:\\Users\\lenovo\\Desktop\\Adhoora\\academics\\year3\\software\\cs305_2022\\lib\\src\\test\\resources\\queries.xml");
           } catch (Exception e) {
               e.printStackTrace();
           }
     }
 
-    @Test
-    public void connectionCheckTest(){
-        assertThrows(DatabaseNotConnectedException.class, ()->{
-            new Library(null, "Fdsa").checkConnection();
-        });
+    @AfterEach
+    void TearDown(){
+        try{
+            c.commit();
+        }
+        catch (Exception e){
+
+        }
     }
 
+
+
     @Test
-    public void insertTest() {
+    public void insert(){
         test_five queryParam = new test_five();
         queryParam.first_name = "RandomTest";
         queryParam.last_name = "test";
@@ -64,23 +70,38 @@ class LibraryTest {
     }
 
     @Test
-    public void selectOneTest (){
+    public void selectOne (){
         String queryParam = "JOHN";
         String queryId = "testOne";
         test Result= library.selectOne(queryId, queryParam, test.class);
         assertEquals(Result.actor_id, 192);
-        String queryParamTwo = "Test";
+        String queryParamTwo = "Testblech";
         test ResultTwo = library.selectOne(queryId, queryParamTwo, test.class);
         assertTrue(ResultTwo == null);
     }
 
     @Test
-    public void selectManyTest (){
+    public void selectMany (){
         String[] queryParam = {"JOHN", "REESE"};
         String queryId = "testTwo";
         List<test_two> Result= library.selectMany(queryId, queryParam, test_two.class);
         assertEquals(Result.size(), 3);
     }
+
+    @Test
+    public void update(){
+        String test = "RandomTestUpdate";
+        int Result= library.update("testEight", test);
+        assertEquals(Result, 10);
+
+    }
+    @Test
+    public void delete(){
+        String test = "RandomTestUpdate";
+        int Result= library.delete("testNine", test);
+        assertEquals(Result, 10);
+    }
+
      @Test
      public void selectOneTestTwo() {
             test_three queryParam = new test_three();
@@ -122,6 +143,13 @@ class LibraryTest {
      }
 
     @Test
+    public void connectionCheckTest(){
+        assertThrows(DatabaseNotConnectedException.class, ()->{
+            new Library(null, "randomTest").checkConnection();
+        });
+    }
+
+    @Test
     void SQLExceptionCheckSelect(){
         String test = "TestCheck";
         assertThrows(RuntimeException.class, ()->{
@@ -150,18 +178,19 @@ class LibraryTest {
          });
      }
 
-
      @Test
-     public void updateTest(){
-        String test = "RandomTestUpdate";
-        int Result= library.update("testEight", test);
-        assertEquals(Result, 10);
+    public void testNestedObjectType(){
+        test_six queryParam = new test_six();
+        queryParam.state_1 = new test_five();
+        queryParam.state_2 = new test_five();
 
-     }
-     @Test
-    public void deleteTest(){
-         String test = "RandomTestUpdate";
-         int Result= library.delete("testNine", test);
-         assertEquals(Result, 10);
+        queryParam.state_1.actor_id = 3000;
+        queryParam.state_2.actor_id = 3001;
+        queryParam.state_1.first_name= "TEST";
+        queryParam.state_2.first_name= "TEST";
+        queryParam.state_1.last_name= "TEST";
+        queryParam.state_2.last_name= "TEST";
+        int Result= library.insert("testTwelve", queryParam);
+        assertEquals(Result, 2);
      }
 }

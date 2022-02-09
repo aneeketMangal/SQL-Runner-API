@@ -33,4 +33,7 @@
    <sql id="testEleven" paramType="java.lang.String">
       <![CDATA[SELECT TABLE * FROM actor WHERE first_name=${value};]]>
    </sql>
+   <sql id="testTwelve" paramType="assignment_1.test_six">
+      <![CDATA[INSERT INTO actor(actor_id, first_name, last_name) VALUES ${state_1}, ${state_2};]]>
+   </sql>
 </queries>

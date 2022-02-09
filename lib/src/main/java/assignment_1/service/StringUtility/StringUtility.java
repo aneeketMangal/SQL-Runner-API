@@ -117,6 +117,7 @@ public class StringUtility extends TypeCheckUtility{
                     }
                 }
                 return populatedQuery;
+
             }
             catch (Exception ee){
                 throw new RuntimeException(ee);
