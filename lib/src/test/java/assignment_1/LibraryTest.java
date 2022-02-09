@@ -4,14 +4,13 @@
 package assignment_1;
 
 import assignment_1.exceptions.*;
+import assignment_1.test_class.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -71,13 +70,63 @@ class LibraryTest {
 
     @Test
     public void selectOne (){
+        // testing basic String types
         String queryParam = "JOHN";
         String queryId = "testOne";
         test Result= library.selectOne(queryId, queryParam, test.class);
         assertEquals(Result.actor_id, 192);
+
+        // testing empty result (no output records)
         String queryParamTwo = "Testblech";
         test ResultTwo = library.selectOne(queryId, queryParamTwo, test.class);
         assertTrue(ResultTwo == null);
+
+        // testing collection types queryParam (here ArrayList)
+        test_three queryParamThree = new test_three();
+        queryParamThree.propOne = new ArrayList<String>();
+        queryParamThree.propOne.add("JOHN");
+        queryParamThree.propOne.add("REESE");
+        queryParamThree.propTwo = "WEST";
+        test_two ResultThree= library.selectOne("testThree", queryParamThree, test_two.class);
+        assertEquals(ResultThree.actor_id, 197);
+
+        /* testing the case where input queryParam has
+        * 3 fields (actor_id, first_name, last_name)
+        * and the XML query only has two fields to fill
+        * first_name and last_name.
+        * The actor_id returned would be 197
+        */
+        test_five queryParamFour = new test_five();
+        queryParamFour.actor_id = 5001;
+        queryParamFour.first_name = "REESE";
+        queryParamFour.last_name = "WEST";
+
+        test_two ResultFour= library.selectOne("testSix", queryParamFour, test_two.class);
+        assertEquals(ResultFour.actor_id, 197);
+
+        /*
+        * Testing the case where output class is test_two
+        * which does not have sufficient fields. test_two
+        * contains only actor_id while output of the given
+        * query has three fields. So it will throw a runtime error.
+        */
+        String queryParamFive = "JOHN";
+        String queryIdFive = "testOne";
+        assertThrows(RuntimeException.class, ()->{
+            library.selectOne(queryIdFive, queryParamFive, test_two.class);
+        });
+
+        /*
+        * Testing a custom Runtime exception
+        * MultipleResultsFoundException, which is
+        * Raised when there are multiple results for a
+        * selectOne type query.
+        */
+        String[] queryParamSix = {"JOHN", "REESE"};
+        String queryIdSix = "testTwo";
+        assertThrows(MultipleResultsFound.class,  () -> {
+            library.selectOne(queryIdSix, queryParamSix, test_two.class);
+        });
     }
 
     @Test
@@ -86,6 +135,27 @@ class LibraryTest {
         String queryId = "testTwo";
         List<test_two> Result= library.selectMany(queryId, queryParam, test_two.class);
         assertEquals(Result.size(), 3);
+
+        /*
+        * Testing RuntimeException case of select many
+        */
+
+        String queryParamTwo = "JOHN";
+        String queryIdTwo = "testOne";
+        assertThrows(RuntimeException.class, ()->{
+            library.selectMany(queryIdTwo, queryParamTwo, test_two.class);
+        });
+
+        /*
+        * Checking Runtime exception raised on
+        * Unsupported classes such as hashmap etc
+        */
+        HashMap<String, String> test = new HashMap<>();
+        test.put("test", "test");
+
+        assertThrows(RuntimeException.class,  () -> {
+            library.selectOne("testSix", test, test_two.class);
+        });
     }
 
     @Test
@@ -94,6 +164,18 @@ class LibraryTest {
         int Result= library.update("testEight", test);
         assertEquals(Result, 10);
 
+
+        /*
+        * Testing the case where we provide
+        * invalid SQL query to update method.
+        * This will throw a RuntimeException object
+        * of type SQLException
+        */
+        String testTwo = "TestCheck";
+        assertThrows(RuntimeException.class, ()->{
+            library.update("testTen", testTwo);
+        });
+
     }
     @Test
     public void delete(){
@@ -101,46 +183,6 @@ class LibraryTest {
         int Result= library.delete("testNine", test);
         assertEquals(Result, 10);
     }
-
-     @Test
-     public void selectOneTestTwo() {
-            test_three queryParam = new test_three();
-            queryParam.propOne = new ArrayList<String>();
-            queryParam.propOne.add("JOHN");
-            queryParam.propOne.add("REESE");
-            queryParam.propTwo = "WEST";
-            test_two Result= library.selectOne("testThree", queryParam, test_two.class);
-            assertEquals(Result.actor_id, 197);
-     }
-
-     @Test
-     void selectOneTestThree(){
-         test_five queryParam = new test_five();
-         queryParam.actor_id = 5001;
-         queryParam.first_name = "REESE";
-         queryParam.last_name = "WEST";
-
-         test_two Result= library.selectOne("testSix", queryParam, test_two.class);
-         assertEquals(Result.actor_id, 197);
-     }
-
-    @Test
-    public void selectOneTestFour (){
-        String queryParam = "JOHN";
-        String queryId = "testOne";
-        assertThrows(RuntimeException.class, ()->{
-            library.selectOne(queryId, queryParam, test_two.class);
-        });
-    }
-
-     @Test
-     void SQLExceptionCheckCount(){
-         String test = "TestCheck";
-         assertThrows(RuntimeException.class, ()->{
-             library.update("testTen", test);
-         });
-
-     }
 
     @Test
     public void connectionCheckTest(){
@@ -158,27 +200,6 @@ class LibraryTest {
     }
 
      @Test
-     void testUnsupportedType(){
-         HashMap<String, String> test = new HashMap<>();
-         test.put("test", "test");
-         System.out.println(test.getClass());
-
-         assertThrows(RuntimeException.class,  () -> {
-             library.selectOne("testSix", test, test_two.class);
-         });
-
-     }
-
-     @Test
-     public void testMultipleTypesInSelectOne(){
-         String[] queryParam = {"JOHN", "REESE"};
-         String queryId = "testTwo";
-         assertThrows(MultipleResultsFound.class,  () -> {
-             library.selectOne(queryId, queryParam, test_two.class);
-         });
-     }
-
-     @Test
     public void testNestedObjectType(){
         test_six queryParam = new test_six();
         queryParam.state_1 = new test_five();
@@ -191,6 +212,10 @@ class LibraryTest {
         queryParam.state_1.last_name= "TEST";
         queryParam.state_2.last_name= "TEST";
         int Result= library.insert("testTwelve", queryParam);
+
+        assertEquals(Result, 2);
+        int [] queryParamTwo = {3000, 3001};
+        Result = library.delete("testThirteen", queryParamTwo);
         assertEquals(Result, 2);
      }
 }

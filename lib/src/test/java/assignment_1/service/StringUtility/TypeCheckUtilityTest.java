@@ -1,10 +1,6 @@
-package assignment_1.service;
+package assignment_1.service.StringUtility;
 
 import org.junit.jupiter.api.Test;
-
-import assignment_1.Library;
-import assignment_1.service.StringUtility.TypeCheckUtility;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
@@ -34,7 +30,8 @@ public class TypeCheckUtilityTest {
     @Test
     public void checkIsCollectionType(){
 
-        Collection<Integer> a = new ArrayList<Integer>();
+        Collection<Integer> a = new ArrayList<>();
+        a.add(5);
         assertTrue(TypeCheckUtility.isCollectionType(a));
     }
 }

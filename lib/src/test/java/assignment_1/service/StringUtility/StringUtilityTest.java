@@ -1,4 +1,4 @@
-package assignment_1.service;
+package assignment_1.service.StringUtility;
 
 import assignment_1.exceptions.NotAComponentTypeException;
 import org.junit.jupiter.api.BeforeEach;

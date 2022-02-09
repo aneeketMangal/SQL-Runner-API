@@ -1,4 +1,4 @@
-package assignment_1;
+package assignment_1.test_class;
 
 public class test_five {
     public int actor_id;

@@ -1,4 +1,4 @@
-package assignment_1;
+package assignment_1.test_class;
 
 import java.util.Date;
 

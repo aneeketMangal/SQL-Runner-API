@@ -8,8 +8,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 
 public class StringUtility extends TypeCheckUtility{
-    //todo: handle date
-
     public String replaceString(String populatedQuery, String old, String newValue) {
 
         return populatedQuery.replace("${" + old + "}", "\"" +newValue+ "\"");

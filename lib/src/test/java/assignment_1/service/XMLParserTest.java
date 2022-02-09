@@ -1,4 +1,4 @@
-package assignment_1;
+package assignment_1.service;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -34,7 +34,7 @@ public class XMLParserTest {
             QueryObject qObj = xmlParser.getQueryObject(queryId);
             assertEquals(qObj.query, "SELECT * FROM actor WHERE first_name=${value};");
         }
-        catch (RuntimeException e){
+        catch (RuntimeException e) {
             assertTrue(e instanceof RuntimeException);
         }
     }
