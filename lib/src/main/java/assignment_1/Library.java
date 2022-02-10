@@ -12,7 +12,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import assignment_1.exceptions.CannotConnectToDatabaseException;
 import assignment_1.exceptions.MultipleResultsFoundException;
 import assignment_1.interfaces.SqlRunner;
 import assignment_1.model.QueryObject;
@@ -33,7 +32,7 @@ public class Library implements SqlRunner {
             this.statement = connection.createStatement();
         }
         catch(Exception E){
-            throw new CannotConnectToDatabaseException(E);
+            throw new RuntimeException(E);
         }
     }
 
