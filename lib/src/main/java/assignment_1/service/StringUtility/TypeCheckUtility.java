@@ -14,7 +14,7 @@ public class TypeCheckUtility {
      * @return
      */
 
-    public static boolean isPrimitiveType(Object check) {
+    public boolean isPrimitiveType(Object check) {
         String className = check.getClass().getName();
         return (className.equals("java.lang.Integer") || className.equals("java.lang.Double") || className.equals("java.lang.Boolean") || className == "java.lang.Character" || className == "java.lang.Byte" || className == "java.lang.Short" || className == "java.lang.Long");
     }
@@ -26,7 +26,7 @@ public class TypeCheckUtility {
      * @return
      */
 
-    public static boolean isCollectionType(Object check) {
+    public boolean isCollectionType(Object check) {
         return check instanceof Collection<?>;
     }
 
@@ -37,18 +37,19 @@ public class TypeCheckUtility {
      * @return
      */
 
-    public static boolean isArrayType(Object check) {
+    public boolean isArrayType(Object check) {
         return check.getClass().isArray();
     }
 
     /**
      * This function checks if the given object is of type
-     * String, char or Character type.
+     * String, char or and Date type.
+     * User needs to provide explicit toString function in case of a java.lang.Date object.
      * @param check
      * @return
      */
 
-    public static boolean isStringType(Object check) {
+    public boolean isStringType(Object check) {
         return check.getClass().getName() == "java.lang.String"|| check.getClass().getName() == "java.lang.Character" || check.getClass().getName() == "java.util.data";
     }
 }

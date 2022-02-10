@@ -19,12 +19,18 @@ import assignment_1.model.QueryObject;
 
 public class XMLParser{
     
-    public String filePath;
-    
+    private final String filePath;
+
+    // public constructor
     public XMLParser(String str){
-        this.filePath = str;
-        // filePath = "C:\\Users\\lenovo\\Desktop\\Adhoora\\academics\\year3\\cs305\\app\\src\\main\\java\\test.xml";
+        filePath = str;
     }
+
+    /**
+     *
+     * @param queryId queryId of the query requested from the XML file
+     * @return
+     */
 
 
     public QueryObject getQueryObject(String queryId){
@@ -32,20 +38,22 @@ public class XMLParser{
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
             // The following line is to help process the XML file securely
-            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 
+            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             // parse the XML file into Document object
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = documentBuilder.parse(new File(filePath));
 
             // the following line is used to normalise the Document
-            // This would help reduce any formatting related anamolies in the documents
-            // such as unwanted whitespaces etc.
+            // This would help reduce any formatting related anomalies in the documents
+            // such as unwanted/extra whitespaces etc.
             document.getDocumentElement().normalize();
 
+            // It makes a NodeList object of all sql tags
             NodeList list = document.getElementsByTagName("sql");
             for (int temp = 0; temp < list.getLength(); temp++) {
 
+                // Check for the first tag with id attribute equal to queryId in the parameters.
                 Node node = list.item(temp);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     

@@ -21,65 +21,32 @@ import assignment_1.service.StringUtility.StringUtility;
 
 public class Library implements SqlRunner {
 
-    public Connection connection;
-    public String xmlFilePath;
-    public XMLParser xmlParser;
-    public StringUtility stringUtility;
-    public Statement statement;
+    private final XMLParser xmlParser; // xmlParser object that provides utility to fetch the query from XML
+    private final StringUtility stringUtility; // stringUtility object that provides functions to populate the placeholders of the query
+    private final Statement statement; // A JDBC  statement object
 
     // Constructor for library Object
     public Library(Connection connection, String filePath) {
-        this.connection = connection;
-        this.xmlFilePath = filePath;
-        this.xmlParser = new XMLParser(this.xmlFilePath);
+        this.xmlParser = new XMLParser(filePath);
         this.stringUtility = new StringUtility();
         try{
-            this.statement = this.connection.createStatement();
+            this.statement = connection.createStatement();
         }
         catch(Exception E){
             throw new CannotConnectToDatabaseException(E);
         }
     }
 
-    public <T> String getPopulatedQuery(String queryId, T queryParam){
-        QueryObject queryObject = this.xmlParser.getQueryObject(queryId);
-        return stringUtility.populateQuery(queryObject, queryParam);
-    }
-
-
-    public <T> int runCountQuery(String queryId, T queryParam) {
-        String populatedQuery = getPopulatedQuery(queryId, queryParam);
-        try {
-            return statement.executeUpdate(populatedQuery);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public <T> ResultSet runSelectQuery(String queryId, T queryParam) {
-        String populatedQuery = getPopulatedQuery(queryId, queryParam);
-        try {
-            return statement.executeQuery(populatedQuery);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public <R> R fillPOJO(ResultSet resultSet, ResultSetMetaData resultMeta, Class<R> resultType) {
-        R returnPOJO;
-        try {
-            returnPOJO = resultType.getDeclaredConstructor().newInstance();
-            for (int i = 0; i < resultMeta.getColumnCount(); i++) {
-                Object value = resultSet.getObject(i + 1);
-                Field field = resultType.getDeclaredField(resultMeta.getColumnName(i + 1)); // get the field
-                field.set(returnPOJO, value);
-            }
-            return returnPOJO;
-        } catch (Exception e){
-            throw new RuntimeException(e);
-        }
-    }
-
+    /**
+     *
+     * @param queryId Unique ID of the query in the queries.xml file.
+     * @param queryParam Parameter(s) to be used in the query.
+     * @param resultType Type of the object that will be returned after
+     *                   populating it with the data returned by the SQL.
+     * @param <T>
+     * @param <R>
+     * @return
+     */
     @Override
     public <T, R> R selectOne(String queryId, T queryParam, Class<R> resultType) {
         ResultSet resultSet = this.runSelectQuery(queryId, queryParam);
@@ -88,47 +55,156 @@ public class Library implements SqlRunner {
             if (resultSet.next()) {
                 R returnPOJO = fillPOJO(resultSet, resultMeta, resultType);
                 // in case more than one result is found
+                // throws a custom RuntimeException
                 if (resultSet.next()) {
                     throw (new MultipleResultsFoundException(queryId));
                 } else {
+                    // in case there is only one result object
+                    // we return the object
                     return returnPOJO;
-                 }
+                }
+                // in the case when no records are returned as
+                // the result of selectOne query null is returned;
             } else {
                 return null;
             }
 
         }
+        // rethrowing multiple results exception
         catch(MultipleResultsFoundException E){
             throw E;
         }
+        // throwing other kind of exceptions such as SQL, IllegalAccess
         catch (Exception e) {
             throw new RuntimeException(e);
         }
 
     }
-
+    /**
+     * Same as {@link #selectOne(String, Object, Class)} except that this one
+     * returns multiple rows.
+     * @param queryId
+     * @param queryParam
+     * @param resultType
+     * @return
+     */
     @Override
     public <T, R> List<R> selectMany(String queryId, T queryParam, Class<R> resultType) {
         ResultSet resultSet = this.runSelectQuery(queryId, queryParam);
         try {
-            ResultSetMetaData resultMeta = resultSet.getMetaData();
-            List<R> parsedOutput = new ArrayList<R>();
+            ResultSetMetaData resultMeta = resultSet.getMetaData(); // fetching metadata
+            List<R> parsedOutput = new ArrayList<R>(); // creating an arraylist object to return output
             while (resultSet.next()) {
                 R tempPOJO = fillPOJO(resultSet, resultMeta, resultType);
                 parsedOutput.add(tempPOJO);
             }
             return parsedOutput;
+            // throwing runtime exceptions, mostly similar to the cases in selectOne
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public <T> int insert(String queryId, T queryParam) {return this.runCountQuery(queryId, queryParam);}
-
-    @Override
-    public <T> int delete(String queryId, T queryParam) {return this.runCountQuery(queryId, queryParam);}
-
+    /**
+     * Execute an update statement and return the number of rows affected.
+     * @param queryId
+     * @param queryParam
+     * @return
+     */
     @Override
     public <T> int update(String queryId, T queryParam) {return this.runCountQuery(queryId, queryParam);}
+
+    /**
+     * Execute a delete statement and return the number of rows affected.
+     * @param queryId
+     * @param queryParam
+     * @return
+     */
+    @Override
+    public <T> int delete(String queryId, T queryParam) {return runCountQuery(queryId, queryParam);}
+
+    /**
+     * Execute an insert statement and return the number of rows affected.
+     * @param queryId
+     * @param queryParam
+     * @return
+     */
+    @Override
+    public <T> int insert(String queryId, T queryParam) {return runCountQuery(queryId, queryParam);}
+
+
+    // helper functions
+    // to assist run the queries
+
+    /**
+     * Following function fetches the SQL query from the XML and
+     * populates them using stringUtility.populateQuery
+     * @param queryId
+     * @param queryParam
+     * @param <T>
+     * @return
+     */
+    private<T> String getPopulatedQuery(String queryId, T queryParam){
+        QueryObject queryObject = xmlParser.getQueryObject(queryId);
+        return stringUtility.populateQuery(queryObject, queryParam);
+    }
+
+    /**
+     * Helper function to help run the count query i.e. the queries which return the number of rows affected as the output
+     * @param queryId
+     * @param queryParam
+     * @param <T>
+     * @return number of rows affected
+     */
+
+    private <T> int runCountQuery(String queryId, T queryParam) {
+        String populatedQuery = getPopulatedQuery(queryId, queryParam);
+        try {
+            return statement.executeUpdate(populatedQuery);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Returs resultSet object in case of select queries
+     * @param queryId
+     * @param queryParam
+     * @param <T>
+     * @return
+     */
+
+    private <T> ResultSet runSelectQuery(String queryId, T queryParam) {
+        String populatedQuery = getPopulatedQuery(queryId, queryParam);
+        try {
+            return statement.executeQuery(populatedQuery);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Utility function to populate the POJOs to be returned as outputs of select queries.
+     * @param resultSet
+     * @param resultMeta
+     * @param resultType
+     * @param <R>
+     * @return
+     */
+
+    private <R> R fillPOJO(ResultSet resultSet, ResultSetMetaData resultMeta, Class<R> resultType) {
+        R returnPOJO;
+        try {
+            returnPOJO = resultType.getDeclaredConstructor().newInstance(); // creating new instance of R type
+            for (int i = 0; i < resultMeta.getColumnCount(); i++) {
+                Object value = resultSet.getObject(i + 1); // getting object from  result set at i+1th column
+                Field field = resultType.getDeclaredField(resultMeta.getColumnName(i + 1)); // get the field
+                field.set(returnPOJO, value); // setting the required value in the appropriate field
+            }
+            return returnPOJO;
+            // catching and throwing the exceptions generated by reflection API
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
 }
