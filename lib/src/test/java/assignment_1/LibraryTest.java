@@ -41,6 +41,7 @@ class LibraryTest {
                       props.get("user").toString(),
                       props.get("password").toString()
               );
+              c.setAutoCommit(false);
               library = new Library(c,
                       "C:\\Users\\lenovo\\Desktop\\Adhoora\\academics\\year3\\software\\cs305_2022\\lib\\src\\test\\resources\\queries.xml");
           } catch (Exception e) {
@@ -51,10 +52,9 @@ class LibraryTest {
     @AfterEach
     void TearDown(){
         try{
-            c.commit();
+            c.close();
         }
         catch (Exception e){
-
         }
     }
 
@@ -79,6 +79,29 @@ class LibraryTest {
         assertThrows(QueryNotFoundException.class,  () -> {
             library.insert("testRandom", queryParam);
         });
+
+       /*
+       * This is the test of insert functionality and it
+       * also checks the case of nested objects where the fields of an object might
+       * be an object itself and using the
+       *
+       */
+        test_six queryParamFive = new test_six();
+        queryParamFive.state_1 = new test_five();
+        queryParamFive.state_2 = new test_five();
+        queryParamFive.state_1.actor_id = 3000;
+        queryParamFive.state_2.actor_id = 3001;
+        queryParamFive.state_1.first_name= "TEST";
+        queryParamFive.state_2.first_name= "TEST";
+        queryParamFive.state_1.last_name= "TEST";
+        queryParamFive.state_2.last_name= "TEST";
+        int ResultFive= library.insert("testTwelve", queryParamFive);
+
+        assertEquals(ResultFive, 2);
+        int [] queryParamSix= {3000, 3001};
+        int ResultSix = library.delete("testThirteen", queryParamSix);
+        assertEquals(ResultSix, 2);
+
     }
 
     @Test
@@ -189,14 +212,14 @@ class LibraryTest {
         assertEquals(ResultFour.size(), 1);
 
 
+
     }
 
     @Test
     public void update() {
-        String test = "RandomTestUpdate";
+        String test = "NOTNICK";
         int Result = library.update("testEight", test);
-        assertEquals(Result, 10);
-
+        assertEquals(Result, 3);
 
         /*
          * Testing the case where we provide
@@ -212,9 +235,14 @@ class LibraryTest {
 
     @Test
     public void delete(){
-        String test = "RandomTestUpdate";
+        /*
+         * Testing delete query, where I try to
+         * delete rows with actor_id > 200;
+         * Which would return 0
+         */
+        int test = 200;
         int Result= library.delete("testNine", test);
-        assertEquals(Result, 10);
+        assertEquals(Result, 0);
 
         /*
         * Testing the case when the queryParam (object passed in the API call)
@@ -226,24 +254,4 @@ class LibraryTest {
             library.delete("testFifteen", null);
         });
     }
-
-     @Test
-    public void testNestedObjectType(){
-        test_six queryParam = new test_six();
-        queryParam.state_1 = new test_five();
-        queryParam.state_2 = new test_five();
-
-        queryParam.state_1.actor_id = 3000;
-        queryParam.state_2.actor_id = 3001;
-        queryParam.state_1.first_name= "TEST";
-        queryParam.state_2.first_name= "TEST";
-        queryParam.state_1.last_name= "TEST";
-        queryParam.state_2.last_name= "TEST";
-        int Result= library.insert("testTwelve", queryParam);
-
-        assertEquals(Result, 2);
-        int [] queryParamTwo = {3000, 3001};
-        Result = library.delete("testThirteen", queryParamTwo);
-        assertEquals(Result, 2);
-     }
 }

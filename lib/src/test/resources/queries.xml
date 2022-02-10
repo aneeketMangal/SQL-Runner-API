@@ -21,10 +21,10 @@
       <![CDATA[SELECT actor_id FROM actor WHERE first_name =${value};]]>
    </sql>
    <sql id="testEight" paramType="java.lang.String">
-      <![CDATA[UPDATE actor SET first_name = ${value} WHERE first_name ="RandomTest";]]>
+      <![CDATA[UPDATE actor SET first_name = ${value} WHERE first_name ="NICK";]]>
    </sql>
-   <sql id="testNine" paramType="java.lang.String">
-      <![CDATA[DELETE FROM actor WHERE first_name =${value};]]>
+   <sql id="testNine" paramType="java.lang.Integer">
+      <![CDATA[DELETE FROM actor WHERE actor_id>${value};]]>
    </sql>
    <sql id="testTen" paramType="java.lang.String">
       <![CDATA[UPDATE TABLE actor SET first_name = ${value} WHERE first_name ="RandomTest";]]>

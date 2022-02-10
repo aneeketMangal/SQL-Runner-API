@@ -16,7 +16,7 @@ public class TypeCheckUtility {
 
     public static boolean isPrimitiveType(Object check) {
         String className = check.getClass().getName();
-        return (className == "java.lang.Integer" || className == "java.lang.Double" || className == "java.lang.Boolean" || className == "java.lang.Character" || className == "java.lang.Byte" || className == "java.lang.Short" || className == "java.lang.Long");
+        return (className.equals("java.lang.Integer") || className.equals("java.lang.Double") || className.equals("java.lang.Boolean") || className == "java.lang.Character" || className == "java.lang.Byte" || className == "java.lang.Short" || className == "java.lang.Long");
     }
     /**
      * This function check of the given object is of
