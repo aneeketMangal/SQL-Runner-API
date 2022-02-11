@@ -1,7 +1,9 @@
 # CS305 Assignment 5
 Submitter name: Aneeket Mangal\
 Roll No.: 2019CSB1071\
-Course:  CS305 Software Engineering\
+Course:  CS305 Software Engineering
+
+
 ===========================================
 ## 1. What does this program do
 This program is a Java based library that reads SQL queries from an XML file and executes them on an RDBMS.
@@ -127,9 +129,10 @@ Following is the flow and description of classes
 ```bash
   ./gradlew test
 ```
+> The coverage of tests is 95% as tested on intelliJ IDE.
 
 
 ## 4. Provide a snapshot of a sample run
-![img.png](lib/images/img.png)
+![img.png](lib/images/img_1.png)
 ![img.png](lib/images/img2.png)
 
