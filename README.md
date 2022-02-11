@@ -128,5 +128,5 @@ Following is the flow and description of classes
 
 ## 4. Provide a snapshot of a sample run
 ![img.png](lib/images/img.png)
-![img.png](lib/build/img2.png)
+![img.png](lib/images/img2.png)
 
