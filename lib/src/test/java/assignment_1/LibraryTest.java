@@ -37,7 +37,8 @@ class LibraryTest {
               e.printStackTrace();
           }
           try {
-              c = DriverManager.getConnection("jdbc:mysql://localhost:3306/sakila?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autocommit=false",
+              String urlString = "jdbc:mysql://localhost:" + props.get("port").toString() + "/sakila?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autocommit=false";
+              c = DriverManager.getConnection(urlString,
                       props.get("user").toString(),
                       props.get("password").toString()
               );

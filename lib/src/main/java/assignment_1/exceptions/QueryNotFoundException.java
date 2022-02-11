@@ -1,5 +1,6 @@
 package assignment_1.exceptions;
 
+// Thrown when query with the given id cannot be found in the XML file
 public class QueryNotFoundException extends RuntimeException{
     public QueryNotFoundException (String id, String filePath)  
     {  

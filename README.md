@@ -101,14 +101,17 @@ Following is the flow and description of classes
 * This library is built using Java and Gradle.
 * Testing of the library is done against [Sakila Database](https://dev.mysql.com/doc/sakila/en/sakila-installation.html).
 * A sample XML file is present at given [location](lib/src/test/resources/queries.xml).
+* Main application class is [Library](lib/src/main/java/assignment_1/Library.java).
 > **NOTE**\
 > To run the tests, you need to configure [test.properties](lib/src/test/resources/test.properties).
 > Format of the properties file should be as follows:
 > ```
+> port=${portNumber}
 > user=${username}
 > password=${password}
 > ```
 > Replace placeholders with username and password for your MYSQL server.
+> Port is by default set to 3306.
 
 
 ### Instructions to run:
