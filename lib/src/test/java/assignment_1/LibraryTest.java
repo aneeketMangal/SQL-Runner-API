@@ -212,11 +212,8 @@ class LibraryTest {
         List<test_two> ResultFour= library.selectMany("testFourteen", null, test_two.class);
         assertEquals(ResultFour.size(), 1);
 
-        /*
-        * Testing bigger testCases
-        */
-        List<test_seven> result= library.selectMany("testSixteen", null,test_seven.class);
-        assertEquals(result.size(), 371);
+
+
     }
 
     @Test
@@ -257,7 +254,5 @@ class LibraryTest {
         assertThrows(ParamTypeDifferentException.class, ()->{
             library.delete("testFifteen", null);
         });
-
-
     }
 }

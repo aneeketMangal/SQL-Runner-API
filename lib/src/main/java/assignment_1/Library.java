@@ -197,7 +197,7 @@ public class Library implements SqlRunner {
             returnPOJO = resultType.getDeclaredConstructor().newInstance(); // creating new instance of R type
             for (int i = 0; i < resultMeta.getColumnCount(); i++) {
                 Object value = resultSet.getObject(i + 1); // getting object from  result set at i+1th column
-                Field field = resultType.getDeclaredField(resultMeta.getColumnLabel(i + 1)); // get the field
+                Field field = resultType.getDeclaredField(resultMeta.getColumnName(i + 1)); // get the field
                 field.set(returnPOJO, value); // setting the required value in the appropriate field
             }
             return returnPOJO;

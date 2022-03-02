@@ -1,8 +1,8 @@
 # CS305 Assignment 5
 Submitter name: Aneeket Mangal\
 Roll No.: 2019CSB1071\
-Course:  CS305 Software Engineering\
-Git URL: https://github.com/aneeketMangal/cs305_2022.git
+Course:  CS305 Software Engineering
+
 
 ===========================================
 ## 1. What does this program do
@@ -35,8 +35,6 @@ at the runtime with the provided object in the method call.
 * In case of selectMany, query API returns an ArrayList of POJO.
 * The parameters for the SQL queries will be dynamically populated at runtime from the supplied objects.
 * Populating plain-old-java-objects (POJOs) from the results of SELECT queries.
-* Field names of POJOs must correspond to column labels of the returned SQL records.
-
 
 ## 2. A description of how this program works
 Terminology associated with the project
@@ -131,11 +129,10 @@ Following is the flow and description of classes
 ```bash
   ./gradlew test
 ```
-> The coverage of tests is 96% as tested on intelliJ IDE.
+> The coverage of tests is 95% as tested on intelliJ IDE.
 
 
 ## 4. Provide a snapshot of a sample run
-![img.png](lib/images/img.png)
-![img.png](lib/images/img_2.png)
+![img.png](lib/images/img_1.png)
 ![img.png](lib/images/img2.png)
 
